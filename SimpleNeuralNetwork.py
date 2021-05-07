@@ -112,7 +112,7 @@ class SimpleNeuralNetwork:
         :param num: A number
         :return: The value of the sigmoid function using the num as input.
         """
-        return 1 / (1 + np.exp(-num))
+        return 1. / (1. + np.exp(-num))
 
     def update(self) -> np.ndarray:
         """
@@ -132,4 +132,4 @@ class SimpleNeuralNetwork:
 
         :return: A list containing a one-dimensional numpy array containing the values of the corresponding layer.
         """
-        return [self.update() for _ in range(len(self.layer_sizes))]
+        return [self.update() for _ in self.layer_sizes]
