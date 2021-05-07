@@ -34,7 +34,8 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
                                                              self.second_weights, self.second_biases)
 
     def tearDown(self) -> None:
-        pass
+        del self.first_neural_network
+        del self.second_neural_network
 
     def test_update(self) -> None:
         """
