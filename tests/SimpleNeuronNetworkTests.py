@@ -7,10 +7,13 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
     def setUp(self) -> None:
         """
-        Sets up the a neural network which is used during the tests.
+        Sets up the two neural network which are used during the tests. Each network has three layers. The layer's of
+        the first network all have the same number of neurons, while the second network's layers differ in the number
+        of neurons.
+
         :return: None
         """
-        self.first_layer = np.array([1, 1, 1, 1])
+        self.first_layer = np.array([1, 1, 1, 1])  # The input is the same for both neural networks.
 
         self.biases = [np.array([1, 1, 1, 1]), np.array([1, 1, 1, 1])]
         self.second_biases = [np.array([1, 1]), np.array([1])]
@@ -24,6 +27,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         self.layer_sizes = np.array([4, 4, 4])
         self.second_layer_sizes = np.array([4, 2, 1])
 
+        # Set up the networks with parameters from above.
         self.first_neural_network = snn.SimpleNeuralNetwork(self.first_layer, self.layer_sizes, self.weights,
                                                             self.biases)
         self.second_neural_network = snn.SimpleNeuralNetwork(self.first_layer, self.second_layer_sizes,
@@ -32,7 +36,12 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
     def tearDown(self) -> None:
         pass
 
-    def test_update(self):
+    def test_update(self) -> None:
+        """
+        This method tests the update method of both neural networks.
+
+        :return: None
+        """
         self.first_neural_network.update()
         np.testing.assert_array_almost_equal(self.first_neural_network.current_layer, np.array([0.8495477739862124,
                                                                                                 0.8495477739862124,
