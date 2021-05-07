@@ -5,13 +5,14 @@ class SimpleNeuralNetwork:
 
     _layer_counter = 0
 
-    def __init__(self, first_layer: np.ndarray, layer_sizes: np.ndarray, weights: np.array, biases: np.array):
+    def __init__(self, first_layer: np.ndarray, layer_sizes: np.ndarray, weights: np.array, biases: np.array) -> None:
         """
         This is the constructor for a simple feed forward neural network object. The neural network consist of
         individual layers of different which are connected through the weights and biases via linear equation.
         The result of this linear equation is then put in a Sigmoid function to amp it to the interval [0, 1].
         For further reading checkout the book http://neuralnetworksanddeeplearning.com/ by Michael Nielsen.
 
+        :param first_layer: The first layer of the neural network which corresponds to the input fed to the network.
         :param layer_sizes: A 1D numpy array, containing the size (number of neurons) of the individual layers.
         :param weights: Weights connecting the neurons of one layer to the next via multiplication.
         :param biases: Biases added to neurons of each layer.
@@ -22,11 +23,11 @@ class SimpleNeuralNetwork:
         self.biases = biases
 
     @property
-    def layer_sizes(self):
+    def layer_sizes(self) -> np.ndarray:
         return self._layer_sizes
 
     @layer_sizes.setter
-    def layer_sizes(self, new_layer_sizes):
+    def layer_sizes(self, new_layer_sizes) -> None:
         """
         Setter method for the layer sizes. it is tested if the new layer sizes is a numpy, has an according shape and is
         filled with positive integers. If this is not the case, an according error is raised. If no error is raised, the
@@ -49,11 +50,11 @@ class SimpleNeuralNetwork:
         self._layer_sizes = new_layer_sizes
 
     @property
-    def biases(self):
+    def biases(self) -> np.ndarray:
         return self._biases
 
     @biases.setter
-    def biases(self, new_biases):
+    def biases(self, new_biases) -> None:
         """
         Setter method for the biases used in the connections of the neural networks. Before a new array of biases is
         set, it is checked if it is a numpy array, has an according shape, is filled with real numbers and if the shapes
@@ -76,11 +77,11 @@ class SimpleNeuralNetwork:
         self._biases = new_biases
 
     @property
-    def weights(self):
+    def weights(self) -> np.ndarray:
         return self._weights
 
     @weights.setter
-    def weights(self, new_weights):
+    def weights(self, new_weights) -> None:
         """
         Setter method for the weights which are used in the connection of the layers. Before a the weights are set a
         number of checks is performed. These checks include if the newly entered weights are in a numpy array, if this
