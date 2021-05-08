@@ -91,7 +91,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
         # Test if new weights are declared correctly.
         new_weights = [np.array([[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]]),
-                      np.array([[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]])]
+                       np.array([[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]])]
         self.first_neural_network.weights = new_weights
         np.testing.assert_array_almost_equal(self.first_neural_network.weights, new_weights)
 
