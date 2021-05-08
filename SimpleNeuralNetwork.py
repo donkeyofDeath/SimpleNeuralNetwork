@@ -5,8 +5,7 @@ class SimpleNeuralNetwork:
 
     _layer_counter = 0
 
-    def __init__(self, first_layer: np.ndarray, layer_sizes: np.ndarray, weights: list, biases: list) ->\
-            None:
+    def __init__(self, first_layer: np.ndarray, layer_sizes: np.ndarray, weight_list: list, bias_list: list) -> None:
         """
         This is the constructor for a simple feed forward neural network object. The neural network consist of
         individual layers of different which are connected through the weights and biases via linear equation.
@@ -15,13 +14,13 @@ class SimpleNeuralNetwork:
 
         :param first_layer: The first layer of the neural network which corresponds to the input fed to the network.
         :param layer_sizes: A 1D numpy array, containing the size (number of neurons) of the individual layers.
-        :param weights: Weights connecting the neurons of one layer to the next via multiplication.
-        :param biases: Biases added to neurons of each layer.
+        :param weight_list: List of weight matrix connecting the layers of the network via multiplication.
+        :param bias_list: List of bias vectors added to neurons of each layer.
         """
         self.current_layer = self.sigmoid_function(first_layer)
         self.layer_sizes = layer_sizes
-        self.weights = weights
-        self.biases = biases
+        self.weights = weight_list
+        self.biases = bias_list
 
     @property
     def layer_sizes(self) -> np.ndarray:
@@ -51,7 +50,7 @@ class SimpleNeuralNetwork:
         self._layer_sizes = new_layer_sizes
 
     @property
-    def biases(self) -> np.ndarray:
+    def biases(self) -> list:
         return self._biases
 
     @biases.setter
@@ -68,19 +67,24 @@ class SimpleNeuralNetwork:
             raise TypeError("All entries of the biases have to be numpy arrays.")
 
         for n, bias_vector in enumerate(new_biases):
+            if not isinstance(bias_vector, np.ndarray):
+                raise TypeError("All entries of the bias list have to be numpy arrays.")
+
             shape = bias_vector.shape
+
+            if not (bias_vector.dtype == float or bias_vector.dtype == int):
+                raise TypeError("The entries of the biases have to be real numbers.")
+
             if shape[0] != self.layer_sizes[n + 1]:
                 raise ValueError(f"Shape f{shape} of the {n}-th bias vector does not coincide with the {n + 1}-th layer"
                                  f"size {self.layer_sizes[n + 1]}.")
             if len(bias_vector.shape) != 1:
                 raise ValueError("All entries of biases have to be one-dimensional.")
-            if not (bias_vector.dtype == float or bias_vector.dtype == int):
-                raise TypeError("The entries of the biases have to be real numbers.")
 
         self._biases = new_biases
 
     @property
-    def weights(self) -> np.ndarray:
+    def weights(self) -> list:
         return self._weights
 
     @weights.setter
@@ -94,23 +98,33 @@ class SimpleNeuralNetwork:
         :param new_weights: New weights which are set after the checks have been performed.
         :return: None.
         """
+        # Check if the assigned object is a list.
         if not isinstance(new_weights, list):
             raise TypeError("The weights have to be a list.")
 
+        # Loop through all the entries.
         for n, weight_matrix in enumerate(new_weights):
+            # Check if each entry is a numpy array.
+            if not isinstance(weight_matrix, np.ndarray):
+                raise TypeError("The entries of the weight list have to be numpy arrays.")
+
             shape = weight_matrix.shape
+
+            # Check of the shape of each entry
             if not (len(shape) == 2 or len(shape) == 1):
                 raise ValueError("All entries of weight list have to be two-dimensional.")
+            # Check if the entries a re numbers
             if not (weight_matrix.dtype == float or weight_matrix.dtype == int):
                 raise TypeError("The entries of the weights have to be real numbers.")
+            # Check if the dimension of the weight matrices coincide with the layer sizes.
             if len(shape) == 2:
                 if shape[0] != self.layer_sizes[n + 1] or shape[1] != self.layer_sizes[n]:
-                    raise ValueError(f"Shapes {shape} of the {n}-th weight matrix does not coincide with the layer sizes"
-                                     f"{(self.layer_sizes[n + 1], self.layer_sizes[n])} .")
+                    raise ValueError(f"Shapes {shape} of the {n}-th weight matrix does not coincide with the layer"
+                                     f"sizes {(self.layer_sizes[n + 1], self.layer_sizes[n])} .")
             elif len(shape) == 1:
                 if shape[0] != self.layer_sizes[n]:
-                    raise ValueError(f"Shapes {shape} of the {n}-th weight matrix does not coincide with the layer sizes"
-                                     f"{self.layer_sizes[n]}.")
+                    raise ValueError(f"Shapes {shape} of the {n}-th weight matrix does not coincide with the layer"
+                                     f"sizes {self.layer_sizes[n]}.")
 
         self._weights = new_weights
 
