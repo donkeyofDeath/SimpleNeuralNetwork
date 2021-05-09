@@ -98,7 +98,8 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
     def test_layer_sizes(self) -> None:
         """
-
+        Test if all the according errors are raised when wrong declaration are made. Further it is tested if correct
+        variables are declared correctly.
 
         :return: None
         """
@@ -127,10 +128,11 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         self.first_neural_network.layer_sizes = new_layer_sizes
         np.testing.assert_array_almost_equal(self.first_neural_network.layer_sizes, new_layer_sizes)
 
-    def test_check_shapes_biases(self):
+    def test_check_shapes_biases(self) -> None:
         """
+        Tests if the check_shapes method raises errors correctly when setting new biases.
 
-        :return:
+        :return: None
         """
         # Tests if weight matrices with the wrong shape raise an error.
         self.first_neural_network.biases = [np.array([1, 1, 1, 1, 1]), np.array([1, 1, 1, 1, 1])]
@@ -142,10 +144,11 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         with self.assertRaises(ValueError):
             self.second_neural_network.check_shapes()
 
-    def test_check_shapes_weights(self):
+    def test_check_shapes_weights(self) -> None:
         """
+        Tests if the checks_shapes raises the correct when new weights are set.
 
-        :return:
+        :return: None
         """
         # Tests if weight matrices with the wrong shape raise an error.
         self.first_neural_network.weights = [np.array([[1, 1], [1, 1]]), np.array([[1, 1], [1, 1]]), np.array([1])]
@@ -175,10 +178,14 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
     def test_run(self) -> None:
         """
-
+        Tests the if the run method calculates the individual layers of the neural network correctly.
 
         :return: None.
         """
+        # Update the fist neural network.
+        self.first_neural_network.update()
+
+        # Check if the run method resets the parameters set by the update method correctly.
         first_result_list = self.first_neural_network.run()
         np.testing.assert_array_almost_equal(first_result_list[0], np.array([0.7310585786300049,
                                                                              0.7310585786300049,
@@ -195,6 +202,9 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
                                                                              0.8640739977337843,
                                                                              0.8640739977337843]))
 
+        self.second_neural_network.update()  # Update the fist neural network.
+
+        # Check if the run method resets the parameters set by the update method correctly.
         second_result_list = self.second_neural_network.run()
         np.testing.assert_array_almost_equal(second_result_list[0], np.array([0.7310585786300049,
                                                                               0.7310585786300049,
@@ -208,7 +218,8 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
     def test_sigmoid_function(self) -> None:
         """
-
+        Tests the sigmoid function.
+        
         :return: None
         """
         np.testing.assert_almost_equal(self.first_neural_network.sigmoid_function(0.), 0.5)
