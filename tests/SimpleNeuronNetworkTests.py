@@ -88,7 +88,10 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         with self.assertRaises(TypeError):
             self.first_neural_network.biases = [np.array(["Hello"])]
 
-        # Test if new weights are declared correctly.
+        with self.assertRaises(ValueError):
+            self.first_neural_network.biases = [np.array([[[1, 1], [1, 1]], [[1, 1], [1, 1]]]), np.array([1])]
+
+        # Test if new biases are declared correctly.
         new_biases = [np.array([0, 0, 0, 0]), np.array([0, 0, 0, 0])]
         self.first_neural_network.biases = new_biases
         np.testing.assert_array_almost_equal(self.first_neural_network.biases, new_biases)
@@ -124,14 +127,35 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         self.first_neural_network.layer_sizes = new_layer_sizes
         np.testing.assert_array_almost_equal(self.first_neural_network.layer_sizes, new_layer_sizes)
 
-    def test_check_shapes(self):
+    def test_check_shapes_biases(self):
         """
 
         :return:
         """
         # Tests if weight matrices with the wrong shape raise an error.
+        self.first_neural_network.biases = [np.array([1, 1, 1, 1, 1]), np.array([1, 1, 1, 1, 1])]
+        self.second_neural_network.biases = [np.array([1, 1, 1, 1, 1, 1]), np.array([1])]
+
         with self.assertRaises(ValueError):
-            self.first_neural_network.biases = [np.array([[[1, 1], [1, 1]], [[1, 1], [1, 1]]]), np.array([1])]
+            self.first_neural_network.check_shapes()
+
+        with self.assertRaises(ValueError):
+            self.second_neural_network.check_shapes()
+
+    def test_check_shapes_weights(self):
+        """
+
+        :return:
+        """
+        # Tests if weight matrices with the wrong shape raise an error.
+        self.first_neural_network.weights = [np.array([[1, 1], [1, 1]]), np.array([[1, 1], [1, 1]]), np.array([1])]
+        self.second_neural_network.weights = [np.array([[1, 1], [1, 1]]), np.array([[1, 1], [1, 1]]), np.array([1])]
+
+        with self.assertRaises(ValueError):
+            self.first_neural_network.check_shapes()
+
+        with self.assertRaises(ValueError):
+            self.second_neural_network.check_shapes()
 
     def test_update(self) -> None:
         """
@@ -148,6 +172,47 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         self.second_neural_network.update()
         np.testing.assert_array_almost_equal(self.second_neural_network.current_layer, np.array([0.9214430516601156,
                                                                                                  0.9214430516601156]))
+
+    def test_run(self) -> None:
+        """
+
+
+        :return: None.
+        """
+        first_result_list = self.first_neural_network.run()
+        np.testing.assert_array_almost_equal(first_result_list[0], np.array([0.7310585786300049,
+                                                                             0.7310585786300049,
+                                                                             0.7310585786300049,
+                                                                             0.7310585786300049]))
+
+        np.testing.assert_array_almost_equal(first_result_list[1], np.array([0.8495477739862124,
+                                                                             0.8495477739862124,
+                                                                             0.8495477739862124,
+                                                                             0.8495477739862124]))
+
+        np.testing.assert_array_almost_equal(first_result_list[2], np.array([0.8640739977337843,
+                                                                             0.8640739977337843,
+                                                                             0.8640739977337843,
+                                                                             0.8640739977337843]))
+
+        second_result_list = self.second_neural_network.run()
+        np.testing.assert_array_almost_equal(second_result_list[0], np.array([0.7310585786300049,
+                                                                              0.7310585786300049,
+                                                                              0.7310585786300049,
+                                                                              0.7310585786300049]))
+
+        np.testing.assert_array_almost_equal(second_result_list[1], np.array([0.9214430516601156,
+                                                                              0.9214430516601156]))
+
+        np.testing.assert_array_almost_equal(second_result_list[2], np.array([0.9449497893439537]))
+
+    def test_sigmoid_function(self) -> None:
+        """
+
+        :return: None
+        """
+        np.testing.assert_almost_equal(self.first_neural_network.sigmoid_function(0.), 0.5)
+        np.testing.assert_almost_equal(self.first_neural_network.sigmoid_function(0.5), 0.622459)
 
 
 if __name__ == "__main__":

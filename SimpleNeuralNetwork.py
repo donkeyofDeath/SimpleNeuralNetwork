@@ -7,6 +7,7 @@ class SimpleNeuralNetwork:
 
     def __init__(self, first_layer: np.ndarray, layer_sizes: np.ndarray, weight_list: list, bias_list: list) -> None:
         """
+        Tested.
         This is the constructor for a simple feed forward neural network object. The neural network consist of
         individual layers of different which are connected through the weights and biases via linear equation.
         The result of this linear equation is then put in a Sigmoid function to amp it to the interval [0, 1].
@@ -29,6 +30,7 @@ class SimpleNeuralNetwork:
     @layer_sizes.setter
     def layer_sizes(self, new_layer_sizes) -> None:
         """
+        Tested.
         Setter method for the layer sizes. it is tested if the new layer sizes is a numpy, has an according shape and is
         filled with positive integers. If this is not the case, an according error is raised. If no error is raised, the
         layer sizes are updated.
@@ -65,6 +67,7 @@ class SimpleNeuralNetwork:
     @biases.setter
     def biases(self, new_biases) -> None:
         """
+        Tested.
         Setter method for the biases used in the connections of the neural networks. Before a new array of biases is
         set, it is checked if it is a numpy array, has an according shape, is filled with real numbers and if the shapes
         of the biases conform with the sizes entered in the layer_sizes field.
@@ -79,6 +82,9 @@ class SimpleNeuralNetwork:
             if not isinstance(bias_vector, np.ndarray):
                 raise TypeError("All entries of the bias list have to be numpy arrays.")
 
+            if len(bias_vector.shape) != 1:
+                raise ValueError("All entries of biases have to be one-dimensional.")
+
             if not (bias_vector.dtype == float or bias_vector.dtype == int):
                 raise TypeError("The entries of the biases have to be real numbers.")
 
@@ -91,6 +97,7 @@ class SimpleNeuralNetwork:
     @weights.setter
     def weights(self, new_weights) -> None:
         """
+        Tested.
         Setter method for the weights which are used in the connection of the layers. Before a the weights are set a
         number of checks is performed. These checks include if the newly entered weights are in a numpy array, if this
         array has the right shape, if the numpy is filled with numbers and if the shapes of the individual weight
@@ -113,7 +120,7 @@ class SimpleNeuralNetwork:
 
             # Check of the shape of each entry
             if not (len(shape) == 2 or len(shape) == 1):
-                raise ValueError("All entries of weight list have to be two-dimensional.")
+                raise ValueError("All entries of weight list have to be one- or two-dimensional.")
             # Check if the entries a re numbers
             if not (weight_matrix.dtype == float or weight_matrix.dtype == int):
                 raise TypeError("The entries of the weights have to be real numbers.")
@@ -121,8 +128,9 @@ class SimpleNeuralNetwork:
         self._weights = new_weights
 
     @staticmethod
-    def sigmoid_function(num: np.ndarray) -> np.ndarray:
+    def sigmoid_function(num):
         """
+        Tested.
         Sigmoid function compatible with numpy arrays.
 
         :param num: A number
@@ -132,7 +140,7 @@ class SimpleNeuralNetwork:
 
     def check_shapes(self) -> None:
         """
-
+        Tested.
         :return:
         """
         for n, weight_matrix in enumerate(self.weights):
@@ -156,11 +164,10 @@ class SimpleNeuralNetwork:
             if shape[0] != self.layer_sizes[n + 1]:
                 raise ValueError(f"Shape f{shape} of the {n}-th bias vector does not coincide with the {n + 1}-th layer"
                                  f"size {self.layer_sizes[n + 1]}.")
-            if len(bias_vector.shape) != 1:
-                raise ValueError("All entries of biases have to be one-dimensional.")
 
     def update(self) -> np.ndarray:
         """
+        Tested.
         Moves from on layer to the next, updating the current layer.
 
         :return: The new layer, which is now the current layer.
@@ -173,10 +180,11 @@ class SimpleNeuralNetwork:
 
     def run(self) -> list:
         """
+        Tested.
         Runs the update() method repeatedly. How often the method is run is determined by the length of the layer_sizes
         attribute.
 
         :return: A list containing a one-dimensional numpy array containing the values of the corresponding layer.
         """
         self.check_shapes()
-        return [self.update() for _ in range(len(self.layer_sizes) - 1)]
+        return [self.current_layer] + [self.update() for _ in range(len(self.layer_sizes) - 1)]
