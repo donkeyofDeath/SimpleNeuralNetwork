@@ -187,9 +187,8 @@ class SimpleNeuralNetwork:
         """
         # Update function from one layer to another.
         self.current_layer = self.sigmoid_function(np.dot(mat, self.current_layer) + bias)
-        return self.current_layer
 
-    def run(self) -> list:
+    def run(self) -> np.ndarray:
         """
         Tested.
         Runs the update() method repeatedly. How often the method is run is determined by the length of the layer_sizes
@@ -197,9 +196,12 @@ class SimpleNeuralNetwork:
 
         :return: A list containing a one-dimensional numpy array containing the values of the corresponding layer.
         """
-        self.check_shapes()  # Check the shapes
+        self.check_shapes()  # Check the shapes.
 
         self.current_layer = self.first_layer  # Reset the current layer regardless if update was called before.
 
         # Return a list of numpy arrays corresponding to neurons in the according layer.
-        return [self.first_layer] + [self.update(weight, bias) for weight, bias in zip(self.weights, self.biases)]
+        for weight, bias in zip(self.weights, self.biases):
+            self.update(weight, bias)
+
+        return self.current_layer

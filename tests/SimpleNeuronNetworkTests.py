@@ -182,36 +182,20 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         self.first_neural_network.update(self.first_neural_network.weights[0], self.first_neural_network.biases[0])
 
         # Check if the run method resets the parameters set by the update method correctly.
-        first_result_list = self.first_neural_network.run()
-        np.testing.assert_array_almost_equal(first_result_list[0], np.array([0.7310585786300049,
-                                                                             0.7310585786300049,
-                                                                             0.7310585786300049,
-                                                                             0.7310585786300049]))
+        first_result = self.first_neural_network.run()
 
-        np.testing.assert_array_almost_equal(first_result_list[1], np.array([0.8495477739862124,
-                                                                             0.8495477739862124,
-                                                                             0.8495477739862124,
-                                                                             0.8495477739862124]))
-
-        np.testing.assert_array_almost_equal(first_result_list[2], np.array([0.8640739977337843,
-                                                                             0.8640739977337843,
-                                                                             0.8640739977337843,
-                                                                             0.8640739977337843]))
+        np.testing.assert_array_almost_equal(first_result[2], np.array([0.8640739977337843,
+                                                                        0.8640739977337843,
+                                                                        0.8640739977337843,
+                                                                        0.8640739977337843]))
 
         # Update the fist neural network.
         self.second_neural_network.update(self.second_neural_network.weights[0], self.second_neural_network.biases[0])
 
         # Check if the run method resets the parameters set by the update method correctly.
-        second_result_list = self.second_neural_network.run()
-        np.testing.assert_array_almost_equal(second_result_list[0], np.array([0.7310585786300049,
-                                                                              0.7310585786300049,
-                                                                              0.7310585786300049,
-                                                                              0.7310585786300049]))
+        second_result = self.second_neural_network.run()
 
-        np.testing.assert_array_almost_equal(second_result_list[1], np.array([0.9214430516601156,
-                                                                              0.9214430516601156]))
-
-        np.testing.assert_array_almost_equal(second_result_list[2], np.array([0.9449497893439537]))
+        np.testing.assert_array_almost_equal(second_result, np.array([0.9449497893439537]))
 
     def test_sigmoid_function(self) -> None:
         """
