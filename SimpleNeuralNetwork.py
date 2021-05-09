@@ -2,7 +2,6 @@ import numpy as np
 
 
 class SimpleNeuralNetwork:
-    # _layer_counter = 0
 
     def __init__(self, first_layer: np.ndarray, layer_sizes: np.ndarray, weight_list: list, bias_list: list) -> None:
         """
@@ -160,7 +159,7 @@ class SimpleNeuralNetwork:
         # Loop through all the entries in weights.
         for n, (weight_matrix, bias_vector) in enumerate(zip(self.weights, self.biases)):
 
-            shape = weight_matrix.shape  # Shape of the matrix.
+            shape = weight_matrix.shape  # Shape of the matrix shape.
 
             # Check if the dimension of the weight matrices coincide with the layer sizes.
             if len(shape) == 2:
@@ -172,18 +171,19 @@ class SimpleNeuralNetwork:
                     raise ValueError(f"Shapes {shape} of the {n}-th weight matrix does not coincide with the layer"
                                      f"sizes {self.layer_sizes[n]}.")
 
-            shape = bias_vector.shape  # Save the vector.
+            shape = bias_vector.shape  # Save the vector shape.
 
+            # Check if the shape of the bias vector coincides with layer size.
             if shape[0] != self.layer_sizes[n + 1]:
                 raise ValueError(f"Shape f{shape} of the {n}-th bias vector does not coincide with the {n + 1}-th layer"
                                  f"size {self.layer_sizes[n + 1]}.")
 
-    def update(self, mat: np.ndarray, bias: np.ndarray) -> np.ndarray:
+    def update(self, mat: np.ndarray, bias: np.ndarray) -> None:
         """
         Tested.
         Moves from on layer to the next, updating the current layer.
 
-        :return: The new layer, which is now the current layer.
+        :return: None.
         """
         # Update function from one layer to another.
         self.current_layer = self.sigmoid_function(np.dot(mat, self.current_layer) + bias)
