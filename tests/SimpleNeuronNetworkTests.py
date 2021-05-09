@@ -212,7 +212,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         :return: None
         """
         np.testing.assert_almost_equal(self.first_neural_network.sigmoid_function(0.), 0.5)
-        np.testing.assert_almost_equal(self.first_neural_network.sigmoid_function(0.5), 0.622459)
+        np.testing.assert_almost_equal(self.first_neural_network.sigmoid_function(0.5), 0.6224593312018546)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,6 @@ import numpy as np
 
 
 class SimpleNeuralNetwork:
-
     _layer_counter = 0
 
     def __init__(self, first_layer: np.ndarray, layer_sizes: np.ndarray, weight_list: list, bias_list: list) -> None:
@@ -18,6 +17,7 @@ class SimpleNeuralNetwork:
         :param weight_list: List of weight matrix connecting the layers of the network via multiplication.
         :param bias_list: List of bias vectors added to neurons of each layer.
         """
+        self.first_layer = self.sigmoid_function(first_layer)
         self.current_layer = self.sigmoid_function(first_layer)
         self.layer_sizes = layer_sizes
         self.weights = weight_list
@@ -38,27 +38,32 @@ class SimpleNeuralNetwork:
         :param new_layer_sizes: Numpy array containing the size (number of neurons) of each layer of the neural network.
         :return: None
         """
+        # Check: The new layer sizes is a list of numpy array.
         if not isinstance(new_layer_sizes, np.ndarray):
             raise TypeError("The layer sizes have to be a numpy array.")
 
+        # Check: The new layer size array is one-dimensional.
         if len(new_layer_sizes.shape) != 1:
             raise ValueError("The sizes of the layers has to be a one-dimensional array.")
 
+        # Check: Check if the entries in the array are ints.
         if new_layer_sizes.dtype != int:
             raise TypeError("Size of the layers have to of type int.")
 
+        # Check: All ints in the array are greater than zero.
         if not all(new_layer_sizes > 0):
             raise ValueError("The sizes of the layers have to be positive.")
 
+        # Check: The layer size of the current layer corresponds to one in the new list of layer sizes.
         if len(self.current_layer) != new_layer_sizes[self._layer_counter]:
             raise ValueError("The size of the current layer has to coincide with the corresponding value in the"
                              "layer_sizes array.")
 
         self._layer_sizes = new_layer_sizes
 
-        # Print a warning in colored text to the console.
-        print("\033[93m" + "Warning: Size of the layers was changed. The shape of the weights and biases might not"
-                           "coincide with the layer sizes anymore." + "\033[0m")
+        # Print a warning in colored text to the console when the layer size is changed.
+        # print("\033[93m" + "Warning: Size of the layers was changed. The shape of the weights and biases might not"
+        #                   "coincide with the layer sizes anymore." + "\033[0m")
 
     @property
     def biases(self) -> list:
@@ -75,16 +80,21 @@ class SimpleNeuralNetwork:
         :param new_biases: New basis, replacing the old biases after the checks have been, which are described above.
         :return: None
         """
+        # Check the type of the new biases.
         if not isinstance(new_biases, list):
             raise TypeError("All entries of the biases have to be numpy arrays.")
 
+        # Loop through all the array in the biases.
         for n, bias_vector in enumerate(new_biases):
+            # Check type of all entries in biases.
             if not isinstance(bias_vector, np.ndarray):
                 raise TypeError("All entries of the bias list have to be numpy arrays.")
 
+            # Check if all the arrays have are one-dimensional.
             if len(bias_vector.shape) != 1:
                 raise ValueError("All entries of biases have to be one-dimensional.")
 
+            # Check if all the entries in the arrays are numbers.
             if not (bias_vector.dtype == float or bias_vector.dtype == int):
                 raise TypeError("The entries of the biases have to be real numbers.")
 
@@ -116,11 +126,12 @@ class SimpleNeuralNetwork:
             if not isinstance(weight_matrix, np.ndarray):
                 raise TypeError("The entries of the weight list have to be numpy arrays.")
 
-            shape = weight_matrix.shape
+            shape = weight_matrix.shape  # Save the shape of the matrix.
 
             # Check of the shape of each entry
             if not (len(shape) == 2 or len(shape) == 1):
                 raise ValueError("All entries of weight list have to be one- or two-dimensional.")
+
             # Check if the entries a re numbers
             if not (weight_matrix.dtype == float or weight_matrix.dtype == int):
                 raise TypeError("The entries of the weights have to be real numbers.")
@@ -141,11 +152,15 @@ class SimpleNeuralNetwork:
     def check_shapes(self) -> None:
         """
         Tested.
-        :return:
+        This method checks if the shapes of the entries in weights and biases coincide with the entries in layer sizes.
+        If this is not the case an according error is raised.
+
+        :return: None
         """
+        # Loop through all the entries in weights.
         for n, weight_matrix in enumerate(self.weights):
 
-            shape = weight_matrix.shape
+            shape = weight_matrix.shape  # Save the shape
 
             # Check if the dimension of the weight matrices coincide with the layer sizes.
             if len(shape) == 2:
@@ -157,9 +172,10 @@ class SimpleNeuralNetwork:
                     raise ValueError(f"Shapes {shape} of the {n}-th weight matrix does not coincide with the layer"
                                      f"sizes {self.layer_sizes[n]}.")
 
+        # Loop through all the entries in biases.
         for n, bias_vector in enumerate(self.biases):
 
-            shape = bias_vector.shape
+            shape = bias_vector.shape  # Save the shape.
 
             if shape[0] != self.layer_sizes[n + 1]:
                 raise ValueError(f"Shape f{shape} of the {n}-th bias vector does not coincide with the {n + 1}-th layer"
@@ -172,7 +188,7 @@ class SimpleNeuralNetwork:
 
         :return: The new layer, which is now the current layer.
         """
-        self.check_shapes()
+        # Update function from one layer to another.
         self.current_layer = self.sigmoid_function(np.dot(self.weights[self._layer_counter], self.current_layer) +
                                                    self.biases[self._layer_counter])
         self._layer_counter += 1
@@ -186,5 +202,11 @@ class SimpleNeuralNetwork:
 
         :return: A list containing a one-dimensional numpy array containing the values of the corresponding layer.
         """
-        self.check_shapes()
-        return [self.current_layer] + [self.update() for _ in range(len(self.layer_sizes) - 1)]
+        self.check_shapes()  # Check the shapes
+
+        if self._layer_counter:
+            self._layer_counter = 0  # If the layer counter is not zero, set it to zero.
+            self.current_layer = self.first_layer  # Set the current layer to the first layer
+
+        # Return a list of numpy arrays corresponding to neurons in the according layer.
+        return [self.current_layer] + [self.update() for _ in self.layer_sizes[:-1]]
