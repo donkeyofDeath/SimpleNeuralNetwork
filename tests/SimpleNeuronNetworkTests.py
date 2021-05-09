@@ -119,10 +119,6 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         with self.assertRaises(ValueError):
             self.first_neural_network.layer_sizes = np.array([-1, -2])
 
-        # Error if the shape of the layer_sizes does not coincide with the current layer.
-        with self.assertRaises(ValueError):
-            self.first_neural_network.layer_sizes = np.array([1, 1, 1])
-
         # Test if new layer sizes are set correctly.
         new_layer_sizes = np.array([4, 3, 1])
         self.first_neural_network.layer_sizes = new_layer_sizes
@@ -166,13 +162,13 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
         :return: None
         """
-        self.first_neural_network.update()
+        self.first_neural_network.update(self.first_neural_network.weights[0], self.first_neural_network.biases[0])
         np.testing.assert_array_almost_equal(self.first_neural_network.current_layer, np.array([0.8495477739862124,
                                                                                                 0.8495477739862124,
                                                                                                 0.8495477739862124,
                                                                                                 0.8495477739862124]))
 
-        self.second_neural_network.update()
+        self.second_neural_network.update(self.second_neural_network.weights[0], self.second_neural_network.biases[0])
         np.testing.assert_array_almost_equal(self.second_neural_network.current_layer, np.array([0.9214430516601156,
                                                                                                  0.9214430516601156]))
 
@@ -183,7 +179,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         :return: None.
         """
         # Update the fist neural network.
-        self.first_neural_network.update()
+        self.first_neural_network.update(self.first_neural_network.weights[0], self.first_neural_network.biases[0])
 
         # Check if the run method resets the parameters set by the update method correctly.
         first_result_list = self.first_neural_network.run()
@@ -202,7 +198,8 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
                                                                              0.8640739977337843,
                                                                              0.8640739977337843]))
 
-        self.second_neural_network.update()  # Update the fist neural network.
+        # Update the fist neural network.
+        self.second_neural_network.update(self.second_neural_network.weights[0], self.second_neural_network.biases[0])
 
         # Check if the run method resets the parameters set by the update method correctly.
         second_result_list = self.second_neural_network.run()

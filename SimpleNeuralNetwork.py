@@ -2,7 +2,7 @@ import numpy as np
 
 
 class SimpleNeuralNetwork:
-    _layer_counter = 0
+    # _layer_counter = 0
 
     def __init__(self, first_layer: np.ndarray, layer_sizes: np.ndarray, weight_list: list, bias_list: list) -> None:
         """
@@ -55,9 +55,9 @@ class SimpleNeuralNetwork:
             raise ValueError("The sizes of the layers have to be positive.")
 
         # Check: The layer size of the current layer corresponds to one in the new list of layer sizes.
-        if len(self.current_layer) != new_layer_sizes[self._layer_counter]:
-            raise ValueError("The size of the current layer has to coincide with the corresponding value in the"
-                             "layer_sizes array.")
+        # if len(self.current_layer) != new_layer_sizes[self._layer_counter]:
+        #    raise ValueError("The size of the current layer has to coincide with the corresponding value in the"
+        #                     "layer_sizes array.")
 
         self._layer_sizes = new_layer_sizes
 
@@ -158,9 +158,9 @@ class SimpleNeuralNetwork:
         :return: None
         """
         # Loop through all the entries in weights.
-        for n, weight_matrix in enumerate(self.weights):
+        for n, (weight_matrix, bias_vector) in enumerate(zip(self.weights, self.biases)):
 
-            shape = weight_matrix.shape  # Save the shape
+            shape = weight_matrix.shape  # Shape of the matrix.
 
             # Check if the dimension of the weight matrices coincide with the layer sizes.
             if len(shape) == 2:
@@ -172,16 +172,13 @@ class SimpleNeuralNetwork:
                     raise ValueError(f"Shapes {shape} of the {n}-th weight matrix does not coincide with the layer"
                                      f"sizes {self.layer_sizes[n]}.")
 
-        # Loop through all the entries in biases.
-        for n, bias_vector in enumerate(self.biases):
-
-            shape = bias_vector.shape  # Save the shape.
+            shape = bias_vector.shape  # Save the vector.
 
             if shape[0] != self.layer_sizes[n + 1]:
                 raise ValueError(f"Shape f{shape} of the {n}-th bias vector does not coincide with the {n + 1}-th layer"
                                  f"size {self.layer_sizes[n + 1]}.")
 
-    def update(self) -> np.ndarray:
+    def update(self, mat: np.ndarray, bias: np.ndarray) -> np.ndarray:
         """
         Tested.
         Moves from on layer to the next, updating the current layer.
@@ -189,9 +186,7 @@ class SimpleNeuralNetwork:
         :return: The new layer, which is now the current layer.
         """
         # Update function from one layer to another.
-        self.current_layer = self.sigmoid_function(np.dot(self.weights[self._layer_counter], self.current_layer) +
-                                                   self.biases[self._layer_counter])
-        self._layer_counter += 1
+        self.current_layer = self.sigmoid_function(np.dot(mat, self.current_layer) + bias)
         return self.current_layer
 
     def run(self) -> list:
@@ -204,9 +199,7 @@ class SimpleNeuralNetwork:
         """
         self.check_shapes()  # Check the shapes
 
-        if self._layer_counter:
-            self._layer_counter = 0  # If the layer counter is not zero, set it to zero.
-            self.current_layer = self.first_layer  # Set the current layer to the first layer
+        self.current_layer = self.first_layer  # Reset the current layer regardless if update was called before.
 
         # Return a list of numpy arrays corresponding to neurons in the according layer.
-        return [self.current_layer] + [self.update() for _ in self.layer_sizes[:-1]]
+        return [self.first_layer] + [self.update(weight, bias) for weight, bias in zip(self.weights, self.biases)]
