@@ -38,16 +38,25 @@ class SimpleNeuralNetwork:
         """
         if not isinstance(new_layer_sizes, np.ndarray):
             raise TypeError("The layer sizes have to be a numpy array.")
+
         if len(new_layer_sizes.shape) != 1:
             raise ValueError("The sizes of the layers has to be a one-dimensional array.")
+
+        if new_layer_sizes.dtype != int:
+            raise TypeError("Size of the layers have to of type int.")
+
+        if not all(new_layer_sizes > 0):
+            raise ValueError("The sizes of the layers have to be positive.")
+
         if len(self.current_layer) != new_layer_sizes[self._layer_counter]:
             raise ValueError("The size of the current layer has to coincide with the corresponding value in the"
                              "layer_sizes array.")
-        if new_layer_sizes.dtype != int:
-            raise TypeError("Size of the layers have to of type int.")
-        if not all(new_layer_sizes > 0):
-            raise ValueError("The sizes of the layers have to be positive.")
+
         self._layer_sizes = new_layer_sizes
+
+        # Print a warning in colored text to the console.
+        print("\033[93m" + "Warning: Size of the layers was changed. The shape of the weights and biases might not"
+                           "coincide with the layer sizes anymore." + "\033[0m")
 
     @property
     def biases(self) -> list:
@@ -70,16 +79,8 @@ class SimpleNeuralNetwork:
             if not isinstance(bias_vector, np.ndarray):
                 raise TypeError("All entries of the bias list have to be numpy arrays.")
 
-            shape = bias_vector.shape
-
             if not (bias_vector.dtype == float or bias_vector.dtype == int):
                 raise TypeError("The entries of the biases have to be real numbers.")
-
-            if shape[0] != self.layer_sizes[n + 1]:
-                raise ValueError(f"Shape f{shape} of the {n}-th bias vector does not coincide with the {n + 1}-th layer"
-                                 f"size {self.layer_sizes[n + 1]}.")
-            if len(bias_vector.shape) != 1:
-                raise ValueError("All entries of biases have to be one-dimensional.")
 
         self._biases = new_biases
 
@@ -93,7 +94,7 @@ class SimpleNeuralNetwork:
         Setter method for the weights which are used in the connection of the layers. Before a the weights are set a
         number of checks is performed. These checks include if the newly entered weights are in a numpy array, if this
         array has the right shape, if the numpy is filled with numbers and if the shapes of the individual weight
-        matrices correspond to the number of neurons delcared by the layer_sizes array.
+        matrices correspond to the number of neurons declared by the layer_sizes array.
 
         :param new_weights: New weights which are set after the checks have been performed.
         :return: None.
@@ -116,15 +117,6 @@ class SimpleNeuralNetwork:
             # Check if the entries a re numbers
             if not (weight_matrix.dtype == float or weight_matrix.dtype == int):
                 raise TypeError("The entries of the weights have to be real numbers.")
-            # Check if the dimension of the weight matrices coincide with the layer sizes.
-            if len(shape) == 2:
-                if shape[0] != self.layer_sizes[n + 1] or shape[1] != self.layer_sizes[n]:
-                    raise ValueError(f"Shapes {shape} of the {n}-th weight matrix does not coincide with the layer"
-                                     f"sizes {(self.layer_sizes[n + 1], self.layer_sizes[n])} .")
-            elif len(shape) == 1:
-                if shape[0] != self.layer_sizes[n]:
-                    raise ValueError(f"Shapes {shape} of the {n}-th weight matrix does not coincide with the layer"
-                                     f"sizes {self.layer_sizes[n]}.")
 
         self._weights = new_weights
 
@@ -138,12 +130,42 @@ class SimpleNeuralNetwork:
         """
         return 1. / (1. + np.exp(-num))
 
+    def check_shapes(self) -> None:
+        """
+
+        :return:
+        """
+        for n, weight_matrix in enumerate(self.weights):
+
+            shape = weight_matrix.shape
+
+            # Check if the dimension of the weight matrices coincide with the layer sizes.
+            if len(shape) == 2:
+                if shape[0] != self.layer_sizes[n + 1] or shape[1] != self.layer_sizes[n]:
+                    raise ValueError(f"Shapes {shape} of the {n}-th weight matrix does not coincide with the layer"
+                                     f" sizes {(self.layer_sizes[n + 1], self.layer_sizes[n])} .")
+            elif len(shape) == 1:
+                if shape[0] != self.layer_sizes[n]:
+                    raise ValueError(f"Shapes {shape} of the {n}-th weight matrix does not coincide with the layer"
+                                     f"sizes {self.layer_sizes[n]}.")
+
+        for n, bias_vector in enumerate(self.biases):
+
+            shape = bias_vector.shape
+
+            if shape[0] != self.layer_sizes[n + 1]:
+                raise ValueError(f"Shape f{shape} of the {n}-th bias vector does not coincide with the {n + 1}-th layer"
+                                 f"size {self.layer_sizes[n + 1]}.")
+            if len(bias_vector.shape) != 1:
+                raise ValueError("All entries of biases have to be one-dimensional.")
+
     def update(self) -> np.ndarray:
         """
         Moves from on layer to the next, updating the current layer.
 
         :return: The new layer, which is now the current layer.
         """
+        self.check_shapes()
         self.current_layer = self.sigmoid_function(np.dot(self.weights[self._layer_counter], self.current_layer) +
                                                    self.biases[self._layer_counter])
         self._layer_counter += 1
@@ -156,4 +178,5 @@ class SimpleNeuralNetwork:
 
         :return: A list containing a one-dimensional numpy array containing the values of the corresponding layer.
         """
+        self.check_shapes()
         return [self.update() for _ in range(len(self.layer_sizes) - 1)]

@@ -42,23 +42,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         del self.first_neural_network
         del self.second_neural_network
 
-    def test_update(self) -> None:
-        """
-        This method tests the update method of both neural networks.
-
-        :return: None
-        """
-        self.first_neural_network.update()
-        np.testing.assert_array_almost_equal(self.first_neural_network.current_layer, np.array([0.8495477739862124,
-                                                                                                0.8495477739862124,
-                                                                                                0.8495477739862124,
-                                                                                                0.8495477739862124]))
-
-        self.second_neural_network.update()
-        np.testing.assert_array_almost_equal(self.second_neural_network.current_layer, np.array([0.9214430516601156,
-                                                                                                 0.9214430516601156]))
-
-    def test_weight_lists(self) -> None:
+    def test_weights(self) -> None:
         """
         Tests if errors are raised correctly when setting the weight_list of a neural network.
 
@@ -80,22 +64,13 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         with self.assertRaises(TypeError):
             self.first_neural_network.weights = [np.array(["Hello"])]
 
-        # Test if the error is raised when the shape of a weight matrix does not coincide with size of a corresponding
-        # layer.
-        with self.assertRaises(ValueError):
-            self.first_neural_network.weights = [np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]),
-                                                 np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]])]
-        with self.assertRaises(ValueError):
-            self.second_neural_network.weights = [np.array([[1, 1, 0, 0], [0, 0, 1, 1]]),
-                                                  np.array([1, 1, 1])]
-
         # Test if new weights are declared correctly.
         new_weights = [np.array([[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]]),
                        np.array([[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]])]
         self.first_neural_network.weights = new_weights
         np.testing.assert_array_almost_equal(self.first_neural_network.weights, new_weights)
 
-    def test_bias_list(self) -> None:
+    def test_biases(self) -> None:
         """
         Tests if errors are raised correctly when setting the bias_list of a neural network.
 
@@ -109,26 +84,71 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         with self.assertRaises(TypeError):
             self.first_neural_network.biases = [1, 2, 3]
 
-        # Tests if weight matrices with the wrong shape raise an error.
-        with self.assertRaises(ValueError):
-            self.first_neural_network.biases = [np.array([[[1, 1], [1, 1]], [[1, 1], [1, 1]]]), np.array([1])]
-
         # Test if the entries of the weight matrices are numbers.
         with self.assertRaises(TypeError):
             self.first_neural_network.biases = [np.array(["Hello"])]
-
-        # Test if the error is raised when the shape of a weight matrix does not coincide with size of a corresponding
-        # layer.
-        with self.assertRaises(ValueError):
-            self.first_neural_network.biases = [np.array([0, 0, 0, 0, 0]), np.array([0, 0, 0, 0])]
-        with self.assertRaises(ValueError):
-            self.second_neural_network.biases = [np.array([0, 0]), np.array([0, 0])]
 
         # Test if new weights are declared correctly.
         new_biases = [np.array([0, 0, 0, 0]), np.array([0, 0, 0, 0])]
         self.first_neural_network.biases = new_biases
         np.testing.assert_array_almost_equal(self.first_neural_network.biases, new_biases)
 
+    def test_layer_sizes(self) -> None:
+        """
 
-if __name__ == '__main__':
+
+        :return: None
+        """
+        # Tests if an error is raised when the layer_sizes attribute is declared with the wrong type.
+        with self.assertRaises(TypeError):
+            self.first_neural_network.layer_sizes = "Hello"
+
+        # Tests if an error is raised if the declared numpy array has the wrong shape.
+        with self.assertRaises(ValueError):
+            self.first_neural_network.layer_sizes = np.array([[1, 1]])
+
+        # Error if other datatype than int is provided.
+        with self.assertRaises(TypeError):
+            self.first_neural_network.layer_sizes = np.array([1., 2.])
+
+        # Error for handling negative ints.
+        with self.assertRaises(ValueError):
+            self.first_neural_network.layer_sizes = np.array([-1, -2])
+
+        # Error if the shape of the layer_sizes does not coincide with the current layer.
+        with self.assertRaises(ValueError):
+            self.first_neural_network.layer_sizes = np.array([1, 1, 1])
+
+        # Test if new layer sizes are set correctly.
+        new_layer_sizes = np.array([4, 3, 1])
+        self.first_neural_network.layer_sizes = new_layer_sizes
+        np.testing.assert_array_almost_equal(self.first_neural_network.layer_sizes, new_layer_sizes)
+
+    def test_check_shapes(self):
+        """
+
+        :return:
+        """
+        # Tests if weight matrices with the wrong shape raise an error.
+        with self.assertRaises(ValueError):
+            self.first_neural_network.biases = [np.array([[[1, 1], [1, 1]], [[1, 1], [1, 1]]]), np.array([1])]
+
+    def test_update(self) -> None:
+        """
+        This method tests the update method of both neural networks.
+
+        :return: None
+        """
+        self.first_neural_network.update()
+        np.testing.assert_array_almost_equal(self.first_neural_network.current_layer, np.array([0.8495477739862124,
+                                                                                                0.8495477739862124,
+                                                                                                0.8495477739862124,
+                                                                                                0.8495477739862124]))
+
+        self.second_neural_network.update()
+        np.testing.assert_array_almost_equal(self.second_neural_network.current_layer, np.array([0.9214430516601156,
+                                                                                                 0.9214430516601156]))
+
+
+if __name__ == "__main__":
     ut.main()
