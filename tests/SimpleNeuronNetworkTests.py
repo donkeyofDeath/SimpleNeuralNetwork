@@ -219,7 +219,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
     def test_sigmoid_function(self) -> None:
         """
         Tests the sigmoid function.
-        
+
         :return: None
         """
         np.testing.assert_almost_equal(self.first_neural_network.sigmoid_function(0.), 0.5)
