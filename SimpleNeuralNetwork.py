@@ -146,7 +146,7 @@ class SimpleNeuralNetwork:
         :param num: A real number.
         :return: The derivative of the Sigmoid function at the point num.
         """
-        return 1. / 2.*(1. + np.cosh(num))
+        return 1. / 2. * (1. + np.cosh(num))
 
     @staticmethod
     def sigmoid_function(num):
@@ -224,37 +224,66 @@ class SimpleNeuralNetwork:
         """
         number_of_training_examples = len(training_data)
         for _ in range(number_of_epochs):
-            rand.shuffle(training_data)
-            mini_batches = [training_data[x:x+mini_batch_size] for x in range(0, number_of_training_examples,
-                                                                              mini_batch_size)]
+
+            rand.shuffle(training_data)  # Randomly shuffle the training data
+
+            # divide training data into mini batches
+            mini_batches = [training_data[x:x + mini_batch_size] for x in range(0, number_of_training_examples,
+                                                                                mini_batch_size)]
             for mini_batch in mini_batches:
                 # Average gradient of a mini batch.
-                self.update_mini_batch(mini_batch, grad_step_size)
+                self.update_weight_and_biases(mini_batch, mini_batch_size, grad_step_size)
 
-    def update_mini_batch(self, mini_batch: list, grad_step_size: float):
+    def update_weight_and_biases(self, mini_batch: list, mini_batch_size: int, grad_step_size: float) -> None:
         """
+        This method uses the data in a mini batch to update the weights and biases using the back propagation algorithm.
 
-        :param mini_batch:
-        :param grad_step_size:
+        :param mini_batch_size: Number of data examples in a mini batch.
+        :param mini_batch: List of tuples containing the data and the desired result of the network corresponding to
+            this data.
+        :param grad_step_size: Step size used in the gradient descent. In formulae it often represented by the greek
+            letter eta.
+        :return: None.
+        """
+        # Creating the sum of the partial derivatives of the weights and biases for a mini batch, which will be
+        # continuously updated via back propagation. These are later used to calculate the mean gradient of a
+        # mini batch.
+        weight_derivatives_sum = [np.zeros(weight.shape) for weight in self.weights]
+        bias_derivatives_sum = [np.zeros(bias.shape) for bias in self.biases]
+
+        for data, desired_result in mini_batch:
+            # Derivatives of the cost function with regards to the individual weights and biases.
+            weight_derivatives, bias_derivatives = self.back_propagation_algorithm(data, desired_result)
+
+            # Update the sum of the derivatives with the new derivatives calculated by back propagation.
+            weight_derivatives_sum = [delta_w_sum + delta_w for delta_w_sum, delta_w in zip(weight_derivatives_sum,
+                                                                                            weight_derivatives)]
+            bias_derivatives_sum = [delta_b_sum + delta_b for delta_b_sum, delta_b in zip(bias_derivatives_sum,
+                                                                                          bias_derivatives)]
+
+        const = grad_step_size / mini_batch_size  # Constant used for calculating the mean gradient.
+
+        # Update the weights and biases of the network.
+        self.weights = [weight - const * delta_w for weight, delta_w in zip(self.weights, weight_derivatives_sum)]
+        self.biases = [bias - const * delta_b for bias, delta_b in zip(self.biases, bias_derivatives_sum)]
+
+    def back_propagation_algorithm(self, data: np.ndarray, desired_result: int) -> (list, list):
+        """
+        The back propagation algorithm
+
+        :param data;
+        :param desired_result:
         :return:
         """
-        network_output = self.feed_forward()
 
-
-    def back_propagation(self):
-        """
-
-        :return:
-        """
-        pass
 
     def grad_descent(self, data: np.ndarray, desired_result: int, step_size: float) -> None:
         """
         Function to calculate the next step of the gradient descent using the gradient descent method.
+
         :param data:
         :param desired_result:
         :param step_size:
         :return: None
         """
         pass
-
