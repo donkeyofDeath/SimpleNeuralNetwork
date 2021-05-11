@@ -189,7 +189,7 @@ class SimpleNeuralNetwork:
                 raise ValueError(f"Shape f{shape} of the {n}-th bias vector does not coincide with the {n + 1}-th layer"
                                  f"size {self.layer_sizes[n + 1]}.")
 
-    def update(self, mat: np.ndarray, bias: np.ndarray) -> None:
+    def update(self, mat: np.ndarray, bias: np.ndarray) -> np.ndarray:
         """
         Tested.
         Moves from on layer to the next, updating the current layer.
@@ -198,6 +198,7 @@ class SimpleNeuralNetwork:
         """
         # Update function from one layer to another.
         self.current_layer = self.sigmoid_function(np.dot(mat, self.current_layer) + bias)
+        return self.current_layer
 
     def feed_forward(self) -> np.ndarray:
         """
@@ -267,15 +268,58 @@ class SimpleNeuralNetwork:
         self.weights = [weight - const * delta_w for weight, delta_w in zip(self.weights, weight_derivatives_sum)]
         self.biases = [bias - const * delta_b for bias, delta_b in zip(self.biases, bias_derivatives_sum)]
 
-    def back_propagation_algorithm(self, data: np.ndarray, desired_result: int) -> (list, list):
+    def back_propagation_algorithm(self, training_data: np.ndarray, desired_result: np.ndarray, mini_batch_size: int) \
+            -> (list, list):
         """
-        The back propagation algorithm
+        The back propagation algorithm. Takes training data as an input an returns the partial derivatives of the
+        weights and biases.
 
-        :param data;
+        :param mini_batch_size: Number of training examples in a mini batch.
+        :param training_data: Training data represented by a numpy array of floats.
+        :param desired_result: Desired output
+        :return: A tuple of lists of numpy arrays. The individual arrays are the weight matrices and bias vectors
+            corresponding to a layer.
+        """
+        # Save the activations of each layer
+        self.current_layer = training_data
+
+        # I can't use update here.
+        activations = np.array([self.update(weight_matrix, bias_vector) for weight_matrix, bias_vector in
+                                zip(self.weights, self.biases)])
+
+        zs = np.array([np.dot(weight_matrix, activation_vector) + bias_vector for weight_matrix, activation_vector, bias_vector
+                       in zip(self.weights, activations[:-1], self.biases)])
+
+        cost_func_grad = self.cost_func_grad(activations[:-1], desired_result)
+
+        delta_last_layer = np.multiply(cost_func_grad,
+                                       self.sigmoid_derivative(np.dot(self.weights[-1], activations[:-2])
+                                                               + self.biases[:-1]))
+
+        deltas = np.array([delta_last_layer])
+        for
+        deltas.append(np.dot(weight_matrix, deltas[0]))
+
+    def calculate_a_and_z(self, training_data: np.ndarray) -> (np.ndarray, np.ndarray):
+        """
+
+        :return:
+        """
+        self.current_layer = training_data
+        activations = [self.sigmoid_function(training_data)] + [self.update(weight_mat, bias_vec) for
+                                                                weight_mat, bias_vec in zip(self.weights, self.biases)]
+        zs =
+
+    @staticmethod
+    def cost_func_grad(last_layer_activation, desired_result):
+        """
+        One component of the gradient of a quadratic cost function with respect to the activation in the last layer of
+        the neural network.
+        :param last_layer_activation:
         :param desired_result:
         :return:
         """
-
+        return last_layer_activation - desired_result
 
     def grad_descent(self, data: np.ndarray, desired_result: int, step_size: float) -> None:
         """
