@@ -1,4 +1,5 @@
 import numpy as np
+import random as rand
 
 
 class SimpleNeuralNetwork:
@@ -138,6 +139,16 @@ class SimpleNeuralNetwork:
         self._weights = new_weights
 
     @staticmethod
+    def sigmoid_derivative(num):
+        """
+        Derivative of the Sigmoid function. Compatible with numpy arrays.
+
+        :param num: A real number.
+        :return: The derivative of the Sigmoid function at the point num.
+        """
+        return 1. / 2.*(1. + np.cosh(num))
+
+    @staticmethod
     def sigmoid_function(num):
         """
         Tested.
@@ -188,7 +199,7 @@ class SimpleNeuralNetwork:
         # Update function from one layer to another.
         self.current_layer = self.sigmoid_function(np.dot(mat, self.current_layer) + bias)
 
-    def run(self) -> np.ndarray:
+    def feed_forward(self) -> np.ndarray:
         """
         Tested.
         Runs the update() method repeatedly. How often the method is run is determined by the length of the layer_sizes
@@ -205,3 +216,45 @@ class SimpleNeuralNetwork:
             self.update(weight, bias)
 
         return self.current_layer
+
+    def learn(self, training_data: list, mini_batch_size: int, number_of_epochs: int, grad_step_size: float) -> None:
+        """
+
+        :return: None
+        """
+        number_of_training_examples = len(training_data)
+        for _ in range(number_of_epochs):
+            rand.shuffle(training_data)
+            mini_batches = [training_data[x:x+mini_batch_size] for x in range(0, number_of_training_examples,
+                                                                              mini_batch_size)]
+            for mini_batch in mini_batches:
+                # Average gradient of a mini batch.
+                self.update_mini_batch(mini_batch, grad_step_size)
+
+    def update_mini_batch(self, mini_batch: list, grad_step_size: float):
+        """
+
+        :param mini_batch:
+        :param grad_step_size:
+        :return:
+        """
+        network_output = self.feed_forward()
+
+
+    def back_propagation(self):
+        """
+
+        :return:
+        """
+        pass
+
+    def grad_descent(self, data: np.ndarray, desired_result: int, step_size: float) -> None:
+        """
+        Function to calculate the next step of the gradient descent using the gradient descent method.
+        :param data:
+        :param desired_result:
+        :param step_size:
+        :return: None
+        """
+        pass
+

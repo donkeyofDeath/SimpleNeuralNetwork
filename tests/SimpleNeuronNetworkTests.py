@@ -172,7 +172,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         np.testing.assert_array_almost_equal(self.second_neural_network.current_layer, np.array([0.9214430516601156,
                                                                                                  0.9214430516601156]))
 
-    def test_run(self) -> None:
+    def test_feed_forward(self) -> None:
         """
         Tests the if the run method calculates the individual layers of the neural network correctly.
 
@@ -182,7 +182,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         self.first_neural_network.update(self.first_neural_network.weights[0], self.first_neural_network.biases[0])
 
         # Check if the run method resets the parameters set by the update method correctly.
-        first_result = self.first_neural_network.run()
+        first_result = self.first_neural_network.feed_forward()
 
         np.testing.assert_array_almost_equal(first_result[2], np.array([0.8640739977337843,
                                                                         0.8640739977337843,
@@ -193,7 +193,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         self.second_neural_network.update(self.second_neural_network.weights[0], self.second_neural_network.biases[0])
 
         # Check if the run method resets the parameters set by the update method correctly.
-        second_result = self.second_neural_network.run()
+        second_result = self.second_neural_network.feed_forward()
 
         np.testing.assert_array_almost_equal(second_result, np.array([0.9449497893439537]))
 
