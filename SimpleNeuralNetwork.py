@@ -218,22 +218,32 @@ class SimpleNeuralNetwork:
 
         return self.current_layer
 
-    def learn(self, training_data: list, mini_batch_size: int, number_of_epochs: int, grad_step_size: float) -> None:
+    def learn(self, training_data: list, mini_batch_size: int, number_of_epochs: int, grad_step_size: float) \
+            -> (list, list):
         """
+        This method is the heart of this class. It "teaches" the neural network using the training data which is
+        separated into mini batches of the size mini_batch_size. The weights and biases of the network are updated
+        after each mini batch using gradient descent and back propagation.
 
-        :return: None
+        :param training_data: Tuples of training data containing the input and the desired output.
+        :param mini_batch_size: Number of training examples in a mini batch.
+        :param number_of_epochs: How many times the network runs through the training examples.
+        :param grad_step_size: The step size used in the gradient descent. In formulas it is often the greek letter eta.
+        :return: A tuple containing the weights an biases.
         """
         number_of_training_examples = len(training_data)
         for _ in range(number_of_epochs):
 
             rand.shuffle(training_data)  # Randomly shuffle the training data
 
-            # divide training data into mini batches
+            # Divide training data into mini batches.
             mini_batches = [training_data[x:x + mini_batch_size] for x in range(0, number_of_training_examples,
                                                                                 mini_batch_size)]
             for mini_batch in mini_batches:
-                # Average gradient of a mini batch.
+                # Updates the weights and biases after going through the training data of a mini batch.
                 self.update_weight_and_biases(mini_batch, mini_batch_size, grad_step_size)
+
+        return self.weights, self.biases
 
     def update_weight_and_biases(self, mini_batch: list, mini_batch_size: int, grad_step_size: float) -> None:
         """
@@ -252,9 +262,9 @@ class SimpleNeuralNetwork:
         weight_derivatives_sum = [np.zeros(weight.shape) for weight in self.weights]
         bias_derivatives_sum = [np.zeros(bias.shape) for bias in self.biases]
 
-        for data, desired_result in mini_batch:
+        for training_data, desired_result in mini_batch:
             # Derivatives of the cost function with regards to the individual weights and biases.
-            weight_derivatives, bias_derivatives = self.back_propagation_algorithm(data, desired_result)
+            weight_derivatives, bias_derivatives = self.back_propagation_algorithm(training_data, desired_result)
 
             # Update the sum of the derivatives with the new derivatives calculated by back propagation.
             weight_derivatives_sum = [delta_w_sum + delta_w for delta_w_sum, delta_w in zip(weight_derivatives_sum,
@@ -264,7 +274,7 @@ class SimpleNeuralNetwork:
 
         const = grad_step_size / mini_batch_size  # Constant used for calculating the mean gradient.
 
-        # Update the weights and biases of the network.
+        # Update the weights and biases of the network using back propagation.
         self.weights = [weight - const * delta_w for weight, delta_w in zip(self.weights, weight_derivatives_sum)]
         self.biases = [bias - const * delta_b for bias, delta_b in zip(self.biases, bias_derivatives_sum)]
 
@@ -356,14 +366,3 @@ class SimpleNeuralNetwork:
         :return:
         """
         return last_layer_activation - desired_result
-
-    def grad_descent(self, data: np.ndarray, desired_result: int, step_size: float) -> None:
-        """
-        Function to calculate the next step of the gradient descent using the gradient descent method.
-
-        :param data:
-        :param desired_result:
-        :param step_size:
-        :return: None
-        """
-        pass
