@@ -280,39 +280,38 @@ class SimpleNeuralNetwork:
         :return: A tuple of lists of numpy arrays. The individual arrays are the weight matrices and bias vectors
             corresponding to a layer.
         """
-        # Save the activations of each layer
-        self.current_layer = training_data
+        activations, z_values = self.calculate_a_and_z(training_data)  # Activations and z values.
 
-        # I can't use update here.
-        activations = np.array([self.update(weight_matrix, bias_vector) for weight_matrix, bias_vector in
-                                zip(self.weights, self.biases)])
+        cost_func_grad = self.cost_func_grad(activations[-1], desired_result)  #
 
-        zs = np.array([np.dot(weight_matrix, activation_vector) + bias_vector for weight_matrix, activation_vector, bias_vector
-                       in zip(self.weights, activations[:-1], self.biases)])
+        deltas_last_layer = np.multiply(cost_func_grad,
+                                        self.sigmoid_derivative(np.dot(self.weights[-1], activations[-2])
+                                                                + self.biases[-1]))
 
-        cost_func_grad = self.cost_func_grad(activations[:-1], desired_result)
+        
 
-        delta_last_layer = np.multiply(cost_func_grad,
-                                       self.sigmoid_derivative(np.dot(self.weights[-1], activations[:-2])
-                                                               + self.biases[:-1]))
-
-        deltas = np.array([delta_last_layer])
-        for
-        deltas.append(np.dot(weight_matrix, deltas[0]))
+        # deltas = np.array([deltas_last_layer])
+        # for
+        # deltas.append(np.dot(weight_matrix, deltas[0]))
 
     def calculate_a_and_z(self, training_data: np.ndarray) -> (np.ndarray, np.ndarray):
         """
+        This method calculates the the activations of the neurons in a neural network as well as the corresponding
+        values of z, which is the variable that is fed to sigmoid function: a(l+1) = sigmoid(z), z = w.a(l) + b.
 
-        :return:
+        :return: Returns a tuple containing the activations and corresponding z values.
         """
-        self.current_layer = training_data
+        self.current_layer = training_data  # Set the current layer to the training data.
+
+        # Calculate the activations for each layer in the neural network.
         activations = [self.sigmoid_function(training_data)] + [self.update(weight_mat, bias_vec) for
                                                                 weight_mat, bias_vec in zip(self.weights, self.biases)]
 
-        zs = [np.dot(weight_mat, activation) + bias_vec for weight_mat, bias_vec, activation in
-              zip(self.weights, self.biases, activations)]
+        # Calculate z values using the activations.
+        z_values = [np.dot(weight_mat, activation) + bias_vec for weight_mat, bias_vec, activation in
+                    zip(self.weights, self.biases, activations[:-1])]
 
-        return np.array(activations), zs 
+        return np.array(activations), np.ndarray(z_values)
 
     @staticmethod
     def cost_func_grad(last_layer_activation, desired_result):
