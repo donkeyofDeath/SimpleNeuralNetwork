@@ -308,7 +308,11 @@ class SimpleNeuralNetwork:
         self.current_layer = training_data
         activations = [self.sigmoid_function(training_data)] + [self.update(weight_mat, bias_vec) for
                                                                 weight_mat, bias_vec in zip(self.weights, self.biases)]
-        zs =
+
+        zs = [np.dot(weight_mat, activation) + bias_vec for weight_mat, bias_vec, activation in
+              zip(self.weights, self.biases, activations)]
+
+        return np.array(activations), zs 
 
     @staticmethod
     def cost_func_grad(last_layer_activation, desired_result):
