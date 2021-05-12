@@ -268,13 +268,11 @@ class SimpleNeuralNetwork:
         self.weights = [weight - const * delta_w for weight, delta_w in zip(self.weights, weight_derivatives_sum)]
         self.biases = [bias - const * delta_b for bias, delta_b in zip(self.biases, bias_derivatives_sum)]
 
-    def back_propagation_algorithm(self, training_data: np.ndarray, desired_result: np.ndarray, mini_batch_size: int) \
-            -> (list, list):
+    def back_propagation_algorithm(self, training_data: np.ndarray, desired_result: np.ndarray) -> (list, list):
         """
         The back propagation algorithm. Takes training data as an input an returns the partial derivatives of the
         weights and biases.
 
-        :param mini_batch_size: Number of training examples in a mini batch.
         :param training_data: Training data represented by a numpy array of floats.
         :param desired_result: Desired output
         :return: A tuple of lists of numpy arrays. The individual arrays are the weight matrices and bias vectors
@@ -284,20 +282,55 @@ class SimpleNeuralNetwork:
 
         cost_func_grad = self.cost_func_grad(activations[-1], desired_result)  #
 
-        deltas_last_layer = np.multiply(cost_func_grad,
-                                        self.sigmoid_derivative(np.dot(self.weights[-1], activations[-2])
-                                                                + self.biases[-1]))
+        delta_vec_last_layer = np.multiply(cost_func_grad,
+                                           self.sigmoid_derivative(np.dot(self.weights[-1], activations[-2])
+                                                                   + self.biases[-1]))
 
-        
+        deltas = self.calculate_deltas(delta_vec_last_layer, z_values)
 
-        # deltas = np.array([deltas_last_layer])
-        # for
-        # deltas.append(np.dot(weight_matrix, deltas[0]))
+        partial_weights = [np.outer(activation_vec, delta_vec) for activation_vec, delta_vec in
+                           zip(activations[:-1], deltas)]
 
-    def calculate_a_and_z(self, training_data: np.ndarray) -> (np.ndarray, np.ndarray):
+        return partial_weights, deltas
+
+    def calculate_deltas(self, delta_last_layer: np.ndarray, z_values: list) -> list:
         """
-        This method calculates the the activations of the neurons in a neural network as well as the corresponding
-        values of z, which is the variable that is fed to sigmoid function: a(l+1) = sigmoid(z), z = w.a(l) + b.
+        This method is part of the back propagation algorithm and calculates the deltas for all the layers in the neural
+        network.
+
+        :param delta_last_layer: The delta values of the last layer in the neural network.
+        :param z_values: List of numpy arrays containing the z values for each layer of the network.
+        :return: A matrix containing all the delta values for each layer
+        """
+        # This variable is used to save the current delta vector by the update_delta_vec function.
+        current_delta_vec = delta_last_layer
+
+        def update_delta_vec(weight_mat: np.ndarray, z_value_vec: np.ndarray) -> np.ndarray:
+            """
+            This is a help function to used to calculate the deltas in the l-th layer using the weight matrix from the
+            (l + 1)-th layer and the z values of the l-th layer.
+
+            :param weight_mat: weight matrix in the (l + 1)-th layer.
+            :param z_value_vec: z values of the l-the layer.
+            :return: Delta for the l-th layer.
+            """
+            nonlocal current_delta_vec
+            current_delta_vec = np.dot(weight_mat.T, current_delta_vec) * self.sigmoid_derivative(z_value_vec)
+            return current_delta_vec
+
+        # A lot happens in the return statement. I will try to quickly sum it up. Since we are doing back propagation
+        # the arguments in zip() ar reversed. Further, we drop the first element of the weights and the last element of
+        # the z values since we wont be needing those during the calculation. Lastly the resulting list  is reversed
+        # again to order the deltas by ascending layer index. Lastly the delta vector of the last layer is added to
+        # return all the deltas.
+        return [update_delta_vec(weight_mat, z_value_vec) for weight_mat, z_value_vec in
+                zip(reversed(self.weights[1:]), reversed(z_values[:-1]))][::-1] + [delta_last_layer]
+
+    def calculate_a_and_z(self, training_data: np.ndarray) -> (list, list):
+        """
+        This method is part of the back propagation algorithm and calculates the the activations of the neurons in a
+        neural network as well as the corresponding values of z, which is the variable that is fed to sigmoid function:
+        a(l+1) = sigmoid(z), z = w.a(l) + b.
 
         :return: Returns a tuple containing the activations and corresponding z values.
         """
@@ -307,11 +340,11 @@ class SimpleNeuralNetwork:
         activations = [self.sigmoid_function(training_data)] + [self.update(weight_mat, bias_vec) for
                                                                 weight_mat, bias_vec in zip(self.weights, self.biases)]
 
-        # Calculate z values using the activations.
+        # Calculate z values using the activations. The last element is dropped since this is the output layer.
         z_values = [np.dot(weight_mat, activation) + bias_vec for weight_mat, bias_vec, activation in
                     zip(self.weights, self.biases, activations[:-1])]
 
-        return np.array(activations), np.ndarray(z_values)
+        return activations, z_values
 
     @staticmethod
     def cost_func_grad(last_layer_activation, desired_result):
