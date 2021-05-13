@@ -4,7 +4,7 @@ import random as rand
 
 class SimpleNeuralNetwork:
 
-    def __init__(self, first_layer: np.ndarray, layer_sizes: np.ndarray, weight_list: list, bias_list: list) -> None:
+    def __init__(self, layer_sizes: np.ndarray, weight_list: list, bias_list: list) -> None:
         """
         Tested.
         This is the constructor for a simple feed forward neural network object. The neural network consist of
@@ -12,13 +12,12 @@ class SimpleNeuralNetwork:
         The result of this linear equation is then put in a Sigmoid function to amp it to the interval [0, 1].
         For further reading checkout the book http://neuralnetworksanddeeplearning.com/ by Michael Nielsen.
 
-        :param first_layer: The first layer of the neural network which corresponds to the input fed to the network.
         :param layer_sizes: A 1D numpy array, containing the size (number of neurons) of the individual layers.
         :param weight_list: List of weight matrix connecting the layers of the network via multiplication.
         :param bias_list: List of bias vectors added to neurons of each layer.
         """
-        self.first_layer = self.sigmoid_function(first_layer)
-        self.current_layer = self.sigmoid_function(first_layer)
+
+        self.current_layer = None
         self.layer_sizes = layer_sizes
         self.weights = weight_list
         self.biases = bias_list
@@ -200,7 +199,7 @@ class SimpleNeuralNetwork:
         self.current_layer = self.sigmoid_function(np.dot(mat, self.current_layer) + bias)
         return self.current_layer
 
-    def feed_forward(self) -> np.ndarray:
+    def feed_forward(self, first_layer: np.ndarray) -> np.ndarray:
         """
         Tested.
         Runs the update() method repeatedly. How often the method is run is determined by the length of the layer_sizes
@@ -210,7 +209,7 @@ class SimpleNeuralNetwork:
         """
         self.check_shapes()  # Check the shapes.
 
-        self.current_layer = self.first_layer  # Reset the current layer regardless if update was called before.
+        self.current_layer = first_layer  # Reset the current layer regardless if update was called before.
 
         # Return a list of numpy arrays corresponding to neurons in the according layer.
         for weight, bias in zip(self.weights, self.biases):
