@@ -48,9 +48,19 @@ print(new_weights[0], new_biases[0])
 result_counter = 0
 test_X = test_X.reshape(len(test_X), num_pixels)
 
+
+def sigmoid(x):
+    return 1. / (1. + np.exp(-x))
+
+
+# print(test_X[0])
+# print(sigmoid(test_X[0]))
+# sigmoid(neural_network.biases[0])
+# sigmoid(neural_network.weights[0])
+
 for data, desired_result in zip(test_X, test_y):
 
-    last_layer_activation = neural_network.feed_forward(data)
+    last_layer_activation = neural_network.feed_forward(data / 255.)
     if desired_result == np.argmax(last_layer_activation):
         result_counter += 1
 

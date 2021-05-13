@@ -209,7 +209,8 @@ class SimpleNeuralNetwork:
         """
         self.check_shapes()  # Check the shapes.
 
-        self.current_layer = first_layer  # Reset the current layer regardless if update was called before.
+        # Reset the current layer regardless if update was called before.
+        self.current_layer = self.sigmoid_function(first_layer)
 
         # Return a list of numpy arrays corresponding to neurons in the according layer.
         for weight, bias in zip(self.weights, self.biases):
@@ -288,6 +289,7 @@ class SimpleNeuralNetwork:
         """
         activations, z_values = self.calculate_a_and_z(training_data)  # Activations and z values.
 
+        print(activations)
         # Gradient of the cost function with respect to the activations of the last layer.
         cost_func_grad = self.cost_func_grad(activations[-1], desired_result)
 
