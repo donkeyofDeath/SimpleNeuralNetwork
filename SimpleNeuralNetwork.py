@@ -266,8 +266,7 @@ class SimpleNeuralNetwork:
             weight_derivatives, bias_derivatives = self.back_propagation_algorithm(training_data, desired_result)
 
             # Update the sum of the derivatives with the new derivatives calculated by back propagation.
-            weight_derivatives_sum = [delta_w_sum + delta_w for delta_w_sum, delta_w in zip(weight_derivatives_sum,
-                                                                                            weight_derivatives)]
+            weight_derivatives_sum = [delta_w_sum + delta_w for delta_w_sum, delta_w in zip(weight_derivatives_sum, weight_derivatives)]
             bias_derivatives_sum = [delta_b_sum + delta_b for delta_b_sum, delta_b in zip(bias_derivatives_sum,
                                                                                           bias_derivatives)]
 
@@ -289,17 +288,23 @@ class SimpleNeuralNetwork:
         """
         activations, z_values = self.calculate_a_and_z(training_data)  # Activations and z values.
 
-        cost_func_grad = self.cost_func_grad(activations[-1], desired_result)  #
+        # Gradient of the cost function with respect to the activations of the last layer.
+        cost_func_grad = self.cost_func_grad(activations[-1], desired_result)
 
+        # vector containing the delta values of the last layer of the neural network.
         delta_vec_last_layer = np.multiply(cost_func_grad,
                                            self.sigmoid_derivative(np.dot(self.weights[-1], activations[-2])
                                                                    + self.biases[-1]))
 
+        # Calculate the delta values of the remaining layers.
         deltas = self.calculate_deltas(delta_vec_last_layer, z_values)
 
-        partial_weights = [np.outer(activation_vec, delta_vec) for activation_vec, delta_vec in
+        # Partial derivative of the cost function with respect to the individual weights.
+        partial_weights = [np.outer(delta_vec, activation_vec) for activation_vec, delta_vec in
                            zip(activations[:-1], deltas)]
 
+        # Returns the partial derivatives of the cost function. The partial derivative of the cost function with respect
+        # to the biases are the values of delta.
         return partial_weights, deltas
 
     def calculate_deltas(self, delta_last_layer: np.ndarray, z_values: list) -> list:
@@ -343,11 +348,11 @@ class SimpleNeuralNetwork:
 
         :return: Returns a tuple containing the activations and corresponding z values.
         """
-        self.current_layer = training_data  # Set the current layer to the training data.
+        self.current_layer = self.sigmoid_function(training_data)  # Set the current layer to the training data.
 
         # Calculate the activations for each layer in the neural network.
-        activations = [self.sigmoid_function(training_data)] + [self.update(weight_mat, bias_vec) for
-                                                                weight_mat, bias_vec in zip(self.weights, self.biases)]
+        activations = [self.current_layer] + [self.update(weight_mat, bias_vec) for
+                                              weight_mat, bias_vec in zip(self.weights, self.biases)]
 
         # Calculate z values using the activations. The last element is dropped since this is the output layer.
         z_values = [np.dot(weight_mat, activation) + bias_vec for weight_mat, bias_vec, activation in

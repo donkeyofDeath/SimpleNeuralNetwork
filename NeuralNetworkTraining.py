@@ -6,7 +6,7 @@ num_pixels = 784  # Number of pixels in a training images.
 num_output_neurons = 10  # Number of neurons in the output layer.
 layer_sizes = np.array([784, 10])  # Sizes of the layers in the neural network.
 
-weights = [np.random.rand(num_pixels, num_output_neurons)]  # Weights used in the neural network.
+weights = [np.random.rand(num_output_neurons, num_pixels)]  # Weights used in the neural network.
 biases = [np.random.rand(num_output_neurons)]  # Biases used in the neural networks.
 
 neural_network = snn.SimpleNeuralNetwork(layer_sizes, weights, biases)  # Define the neural network.
@@ -29,9 +29,12 @@ def convert_number(number: int) -> np.ndarray:
 converted_desired_results = np.array([convert_number(num) for num in desired_results])
 
 # Declare the parameters for the neural network.
+# Reshape the training input so that it is only one vector.
+# train_inputs = np.ndarray([data.reshape(num_pixels) for data in train_inputs])
+train_inputs = train_inputs.reshape(len(train_inputs), num_pixels)
 training_data = list(zip(train_inputs, converted_desired_results))
 mini_batch_size = 100
-learning_rate = 3.
+learning_rate = 1.
 epochs = 5
 
 print("Started learning.")
@@ -39,8 +42,11 @@ print("Started learning.")
 new_weights, new_biases = neural_network.learn(training_data, mini_batch_size, epochs, learning_rate)
 print("Finished learning.")
 
+print(new_weights[0], new_biases[0])
+
 # Test the neural network by going through the test images and counting the number of rightly classified images.
 result_counter = 0
+test_X = test_X.reshape(len(test_X), num_pixels)
 
 for data, desired_result in zip(test_X, test_y):
 
