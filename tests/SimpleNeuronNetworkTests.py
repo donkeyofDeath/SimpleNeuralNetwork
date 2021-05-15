@@ -185,10 +185,10 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         # Check if the run method resets the parameters set by the update method correctly.
         first_result = self.first_neural_network.feed_forward(self.first_layer)
 
-        np.testing.assert_array_almost_equal(first_result[2], np.array([0.8640739977337843,
-                                                                        0.8640739977337843,
-                                                                        0.8640739977337843,
-                                                                        0.8640739977337843]))
+        np.testing.assert_array_almost_equal(first_result, np.array([0.8640739977337843,
+                                                                     0.8640739977337843,
+                                                                     0.8640739977337843,
+                                                                     0.8640739977337843]))
 
         # Check if the run method resets the parameters set by the update method correctly.
         second_result = self.second_neural_network.feed_forward(self.first_layer)
@@ -211,6 +211,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
         :return: None
         """
+
         def finite_difference(func: callable, point: float):
             """
             Returns the the derivative of the function func at the point point.
@@ -218,7 +219,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
             :param point: Point at which the derivative is calculated.
             :return: The derivative of func at the point point.
             """
-            delta_x = 10**(-6)
+            delta_x = 10 ** (-6)
             return (func(point + delta_x) - func(point)) / delta_x
 
         # Points at which the derivative is calculated.
@@ -237,10 +238,46 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         """
         Test the gradient of the cost function.
 
-        :return: None
+        :return: None.
         """
         self.assertAlmostEqual(1 - 2, self.first_neural_network.cost_func_grad(1, 2))
         self.assertAlmostEqual(3 - 2, self.first_neural_network.cost_func_grad(3, 2))
+
+    def test_calculate_a_and_z(self):
+        """
+        Test the methods which calculates the activations and the z values of a neural network.
+
+        :return: None.
+        """
+        # Calculate the activations and the z values of the first neural network.
+        activations, z_values = self.first_neural_network.calculate_a_and_z(self.first_layer)
+
+        self.assertEqual(len(activations), 3)  # Check if the list has the right length.
+        # Check the activations.
+        np.testing.assert_array_almost_equal(activations[0], np.array([0.73105858, 0.73105858, 0.73105858, 0.73105858]))
+        np.testing.assert_array_almost_equal(activations[1], np.array([0.84954777, 0.84954777, 0.84954777, 0.84954777]))
+        np.testing.assert_array_almost_equal(activations[2], np.array([0.864074, 0.864074, 0.864074, 0.864074]))
+
+        self.assertEqual(len(z_values), 2)  # Check if the list has the right length.
+        # Check the z values.
+        np.testing.assert_array_almost_equal(z_values[0], np.array([1.73105858, 1.73105858, 1.73105858, 1.73105858]))
+        np.testing.assert_array_almost_equal(z_values[1], np.array([1.84954777, 1.84954777, 1.84954777, 1.84954777]))
+
+        # Calculate the activations and the z values of the second neural network.
+        activations, z_values = self.second_neural_network.calculate_a_and_z(self.first_layer)
+
+        self.assertEqual(len(activations), 3)  # Check if the list has the right length.
+        # Check the activations.
+        np.testing.assert_array_almost_equal(activations[0], np.array([0.73105858, 0.73105858, 0.73105858, 0.73105858]))
+        np.testing.assert_array_almost_equal(activations[1], np.array([0.9214430516601156, 0.9214430516601156]))
+        np.testing.assert_array_almost_equal(activations[2], np.array([0.9449497893439537]))
+
+        self.assertEqual(len(z_values), 2)  # Check if the list has the right length.
+        # Check the z values.
+        np.testing.assert_array_almost_equal(z_values[0], np.array([1.73105858, 1.73105858, 1.73105858, 1.73105858]))
+        np.testing.assert_array_almost_equal(z_values[1], np.array([1.9214430516601156, 1.9214430516601156]))
+
+
 
 
 if __name__ == "__main__":

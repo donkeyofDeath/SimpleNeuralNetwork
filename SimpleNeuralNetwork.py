@@ -148,6 +148,7 @@ class SimpleNeuralNetwork:
     @staticmethod
     def sigmoid_derivative(num):
         """
+        Tested.
         Derivative of the Sigmoid function. Compatible with numpy arrays.
 
         :param num: A real number.
@@ -177,6 +178,10 @@ class SimpleNeuralNetwork:
         :return:
         """
         return last_layer_activation - desired_result
+
+    # --------------
+    # Normal Methods
+    # --------------
 
     def check_shapes(self) -> None:
         """
@@ -238,26 +243,26 @@ class SimpleNeuralNetwork:
 
         return self.current_layer
 
-    def learn(self, training_data: list, mini_batch_size: int, number_of_epochs: int, grad_step_size: float) \
+    def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, grad_step_size: float) \
             -> (list, list):
         """
         This method is the heart of this class. It "teaches" the neural network using the training data which is
         separated into mini batches of the size mini_batch_size. The weights and biases of the network are updated
         after each mini batch using gradient descent and back propagation.
 
-        :param training_data: Tuples of training data containing the input and the desired output.
+        :param learning_data: Tuples of training data containing the input and the desired output.
         :param mini_batch_size: Number of training examples in a mini batch.
         :param number_of_epochs: How many times the network runs through the training examples.
         :param grad_step_size: The step size used in the gradient descent. In formulas it is often the greek letter eta.
         :return: A tuple containing the weights an biases.
         """
-        number_of_training_examples = len(training_data)
+        number_of_training_examples = len(learning_data)
         for _ in range(number_of_epochs):
 
-            rand.shuffle(training_data)  # Randomly shuffle the training data
+            rand.shuffle(learning_data)  # Randomly shuffle the training data
 
             # Divide training data into mini batches.
-            mini_batches = [training_data[x:x + mini_batch_size] for x in range(0, number_of_training_examples,
+            mini_batches = [learning_data[x:x + mini_batch_size] for x in range(0, number_of_training_examples,
                                                                                 mini_batch_size)]
             for mini_batch in mini_batches:
                 # Updates the weights and biases after going through the training data of a mini batch.
@@ -282,9 +287,9 @@ class SimpleNeuralNetwork:
         weight_derivatives_sum = [np.zeros(weight.shape) for weight in self.weights]
         bias_derivatives_sum = [np.zeros(bias.shape) for bias in self.biases]
 
-        for training_data, desired_result in mini_batch:
+        for training_input, desired_result in mini_batch:
             # Derivatives of the cost function with regards to the individual weights and biases.
-            weight_derivatives, bias_derivatives = self.back_propagation_algorithm(training_data, desired_result)
+            weight_derivatives, bias_derivatives = self.back_propagation_algorithm(training_input, desired_result)
 
             # Update the sum of the derivatives with the new derivatives calculated by back propagation.
             weight_derivatives_sum = [delta_w_sum + delta_w for delta_w_sum, delta_w in zip(weight_derivatives_sum, weight_derivatives)]
@@ -297,17 +302,17 @@ class SimpleNeuralNetwork:
         self.weights = [weight - const * delta_w for weight, delta_w in zip(self.weights, weight_derivatives_sum)]
         self.biases = [bias - const * delta_b for bias, delta_b in zip(self.biases, bias_derivatives_sum)]
 
-    def back_propagation_algorithm(self, training_data: np.ndarray, desired_result: np.ndarray) -> (list, list):
+    def back_propagation_algorithm(self, training_input: np.ndarray, desired_result: np.ndarray) -> (list, list):
         """
         The back propagation algorithm. Takes training data as an input an returns the partial derivatives of the
         weights and biases.
 
-        :param training_data: Training data represented by a numpy array of floats.
+        :param training_input: Training data represented by a numpy array of floats.
         :param desired_result: Desired output
         :return: A tuple of lists of numpy arrays. The individual arrays are the weight matrices and bias vectors
             corresponding to a layer.
         """
-        activations, z_values = self.calculate_a_and_z(training_data)  # Activations and z values.
+        activations, z_values = self.calculate_a_and_z(training_input)  # Activations and z values.
 
         print(activations)
         # Gradient of the cost function with respect to the activations of the last layer.
@@ -362,15 +367,16 @@ class SimpleNeuralNetwork:
         return [update_delta_vec(weight_mat, z_value_vec) for weight_mat, z_value_vec in
                 zip(reversed(self.weights[1:]), reversed(z_values[:-1]))][::-1] + [delta_last_layer]
 
-    def calculate_a_and_z(self, training_data: np.ndarray) -> (list, list):
+    def calculate_a_and_z(self, training_input: np.ndarray) -> (list, list):
         """
+        Tested.
         This method is part of the back propagation algorithm and calculates the the activations of the neurons in a
         neural network as well as the corresponding values of z, which is the variable that is fed to sigmoid function:
         a(l+1) = sigmoid(z), z = w.a(l) + b.
 
         :return: Returns a tuple containing the activations and corresponding z values.
         """
-        self.current_layer = self.sigmoid_function(training_data)  # Set the current layer to the training data.
+        self.current_layer = self.sigmoid_function(training_input)  # Set the current layer to the training data.
 
         # Calculate the activations for each layer in the neural network.
         activations = [self.current_layer] + [self.update(weight_mat, bias_vec) for
