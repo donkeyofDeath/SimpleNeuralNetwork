@@ -277,7 +277,17 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         np.testing.assert_array_almost_equal(z_values[0], np.array([1.73105858, 1.73105858, 1.73105858, 1.73105858]))
         np.testing.assert_array_almost_equal(z_values[1], np.array([1.9214430516601156, 1.9214430516601156]))
 
+    def test_calculate_deltas(self):
+        """
+        Tests if the correct values for delta re returned for the back propagation algorithm.
 
+        :return: NOne.
+        """
+        z_values = [np.array([1., 1., 1., 1.]), np.array([1., 1., 1., 1.])]  # Z values.
+
+        deltas_last_layer = np.array([0.5, 0.5, 0.5, 0.5])  # Deltas of the last layer used for the backpropagation.
+
+        deltas = self.first_neural_network.calculate_deltas(deltas_last_layer, z_values)  # All deltas.
 
 
 if __name__ == "__main__":
