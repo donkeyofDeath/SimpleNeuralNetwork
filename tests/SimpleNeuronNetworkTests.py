@@ -204,6 +204,44 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         np.testing.assert_almost_equal(self.first_neural_network.sigmoid_function(0.), 0.5)
         np.testing.assert_almost_equal(self.first_neural_network.sigmoid_function(0.5), 0.6224593312018546)
 
+    def test_sigmoid_derivative(self) -> None:
+        """
+        Tests if the derivative of the sigmoid function was calculated correctly. The analytical solution is compared to
+        the the result gained by using a finite difference method.
+
+        :return: None
+        """
+        def finite_difference(func: callable, point: float):
+            """
+            Returns the the derivative of the function func at the point point.
+            :param func: Function of which the derivative is calculated.
+            :param point: Point at which the derivative is calculated.
+            :return: The derivative of func at the point point.
+            """
+            delta_x = 10**(-6)
+            return (func(point + delta_x) - func(point)) / delta_x
+
+        # Points at which the derivative is calculated.
+        point_1 = 1.
+        point_2 = 0.
+
+        # Numerically calculated derivatives.
+        finite_difference_1 = finite_difference(self.first_neural_network.sigmoid_function, point_1)
+        finite_difference_2 = finite_difference(self.first_neural_network.sigmoid_function, point_2)
+
+        # Test the results.
+        np.testing.assert_almost_equal(finite_difference_1, self.first_neural_network.sigmoid_derivative(point_1))
+        np.testing.assert_almost_equal(finite_difference_2, self.first_neural_network.sigmoid_derivative(point_2))
+
+    def test_cost_func_grad(self):
+        """
+        Test the gradient of the cost function.
+
+        :return: None
+        """
+        self.assertAlmostEqual(1 - 2, self.first_neural_network.cost_func_grad(1, 2))
+        self.assertAlmostEqual(3 - 2, self.first_neural_network.cost_func_grad(3, 2))
+
 
 if __name__ == "__main__":
     ut.main()

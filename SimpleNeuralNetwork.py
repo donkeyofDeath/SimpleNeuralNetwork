@@ -22,6 +22,10 @@ class SimpleNeuralNetwork:
         self.weights = weight_list
         self.biases = bias_list
 
+    # ----------
+    # Properties
+    # ----------
+
     @property
     def layer_sizes(self) -> np.ndarray:
         return self._layer_sizes
@@ -137,6 +141,10 @@ class SimpleNeuralNetwork:
 
         self._weights = new_weights
 
+    # --------------
+    # Static methods
+    # --------------
+
     @staticmethod
     def sigmoid_derivative(num):
         """
@@ -145,7 +153,7 @@ class SimpleNeuralNetwork:
         :param num: A real number.
         :return: The derivative of the Sigmoid function at the point num.
         """
-        return 1. / 2. * (1. + np.cosh(num))
+        return 0.25 / (np.cosh(num/2))**2
 
     @staticmethod
     def sigmoid_function(num):
@@ -157,6 +165,18 @@ class SimpleNeuralNetwork:
         :return: The value of the sigmoid function using the num as input.
         """
         return 1. / (1. + np.exp(-num))
+
+    @staticmethod
+    def cost_func_grad(last_layer_activation, desired_result):
+        """
+        Tested.
+        One component of the gradient of a quadratic cost function with respect to the activation in the last layer of
+        the neural network.
+        :param last_layer_activation:
+        :param desired_result:
+        :return:
+        """
+        return last_layer_activation - desired_result
 
     def check_shapes(self) -> None:
         """
@@ -361,14 +381,3 @@ class SimpleNeuralNetwork:
                     zip(self.weights, self.biases, activations[:-1])]
 
         return activations, z_values
-
-    @staticmethod
-    def cost_func_grad(last_layer_activation, desired_result):
-        """
-        One component of the gradient of a quadratic cost function with respect to the activation in the last layer of
-        the neural network.
-        :param last_layer_activation:
-        :param desired_result:
-        :return:
-        """
-        return last_layer_activation - desired_result
