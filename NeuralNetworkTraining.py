@@ -9,6 +9,8 @@ layer_sizes = np.array([784, 10])  # Sizes of the layers in the neural network.
 weights = [np.random.rand(num_output_neurons, num_pixels)]  # Weights used in the neural network.
 biases = [np.random.rand(num_output_neurons)]  # Biases used in the neural networks.
 
+print(weights, biases)
+
 neural_network = snn.SimpleNeuralNetwork(layer_sizes, weights, biases)  # Define the neural network.
 (train_inputs, desired_results), (test_X, test_y) = mnist.load_data()  # Load the test data
 
@@ -34,7 +36,7 @@ converted_desired_results = np.array([convert_number(num) for num in desired_res
 train_inputs = train_inputs.reshape(len(train_inputs), num_pixels)
 training_data = list(zip(train_inputs, converted_desired_results))
 mini_batch_size = 100
-learning_rate = 1.
+learning_rate = 10.
 epochs = 5
 
 print("Started learning.")
@@ -42,7 +44,7 @@ print("Started learning.")
 new_weights, new_biases = neural_network.learn(training_data, mini_batch_size, epochs, learning_rate)
 print("Finished learning.")
 
-print(new_weights[0], new_biases[0])
+print(new_weights, new_biases)
 
 # Test the neural network by going through the test images and counting the number of rightly classified images.
 result_counter = 0
@@ -60,7 +62,8 @@ def sigmoid(x):
 
 for data, desired_result in zip(test_X, test_y):
 
-    last_layer_activation = neural_network.feed_forward(data / 255.)
+    last_layer_activation = neural_network.feed_forward(data)
+    # print(last_layer_activation)
     if desired_result == np.argmax(last_layer_activation):
         result_counter += 1
 

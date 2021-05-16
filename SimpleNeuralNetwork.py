@@ -292,10 +292,16 @@ class SimpleNeuralNetwork:
             # Derivatives of the cost function with regards to the individual weights and biases.
             weight_derivatives, bias_derivatives = self.back_propagation_algorithm(training_input, desired_result)
 
+            print(np.max(weight_derivatives), np.max(bias_derivatives))
+
             # Update the sum of the derivatives with the new derivatives calculated by back propagation.
-            weight_derivatives_sum = [delta_w_sum + delta_w for delta_w_sum, delta_w in zip(weight_derivatives_sum, weight_derivatives)]
+            weight_derivatives_sum = [delta_w_sum + delta_w for delta_w_sum, delta_w in zip(weight_derivatives_sum,
+                                                                                            weight_derivatives)]
             bias_derivatives_sum = [delta_b_sum + delta_b for delta_b_sum, delta_b in zip(bias_derivatives_sum,
                                                                                           bias_derivatives)]
+
+        # print(weight_derivatives_sum)
+        # print(bias_derivatives_sum)
 
         const = grad_step_size / mini_batch_size  # Constant used for calculating the mean gradient.
 
@@ -303,15 +309,20 @@ class SimpleNeuralNetwork:
         self.weights = [weight - const * delta_w for weight, delta_w in zip(self.weights, weight_derivatives_sum)]
         self.biases = [bias - const * delta_b for bias, delta_b in zip(self.biases, bias_derivatives_sum)]
 
+        # For debugging.
+        # print(self.weights)
+        # print(self.biases)
+
     def back_propagation_algorithm(self, training_input: np.ndarray, desired_result: np.ndarray) -> (list, list):
         """
         The back propagation algorithm. Takes training data as an input an returns the partial derivatives of the
         weights and biases.
 
         :param training_input: Training data represented by a numpy array of floats.
-        :param desired_result: Desired output
-        :return: A tuple of lists of numpy arrays. The individual arrays are the weight matrices and bias vectors
-            corresponding to a layer.
+        :param desired_result: Desired output associated with the training input laso represented by a numpy array of
+            floats.
+        :return: A tuple of lists of numpy arrays. The individual arrays are the partial derivatives of the cost
+            function with respect to the weights and biases in a layer.
         """
         activations, z_values = self.calculate_a_and_z(training_input)  # Activations and z values.
 

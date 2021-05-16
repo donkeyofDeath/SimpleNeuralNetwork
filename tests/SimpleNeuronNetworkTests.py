@@ -303,6 +303,31 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         np.testing.assert_array_almost_equal(deltas[0], np.array([0.09830596662074094, 0.09830596662074094]))
         np.testing.assert_array_almost_equal(deltas[1], np.array([0.5]))
 
+    def test_back_propagation_algorithm(self):
+        """
+        Tests the back propagation algorithm for two different neural networks.
+
+        :return: None.
+        """
+        training_data = np.array([255., 255., 255., 255.])  # Training data, which serves as an input.
+        desired_result = np.array([0., 0., 0., .1])  # Results, which represents the desired output of the network.
+
+        partial_weights, partial_biases = self.first_neural_network.back_propagation_algorithm(training_data,
+                                                                                               desired_result)
+
+        print(partial_weights, partial_biases)
+
+        # Check if the if the output have the right shapes.
+        self.assertEqual(len(partial_weights), 2)
+        self.assertEqual(partial_weights[0].shape, (4, 4))
+        self.assertEqual(partial_weights[1].shape, (4, 4))
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     ut.main()
