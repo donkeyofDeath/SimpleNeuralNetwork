@@ -292,7 +292,8 @@ class SimpleNeuralNetwork:
             # Derivatives of the cost function with regards to the individual weights and biases.
             weight_derivatives, bias_derivatives = self.back_propagation_algorithm(training_input, desired_result)
 
-            print(np.max(weight_derivatives), np.max(bias_derivatives))
+            # For debugging.
+            # print(np.max(weight_derivatives), np.max(bias_derivatives))
 
             # Update the sum of the derivatives with the new derivatives calculated by back propagation.
             weight_derivatives_sum = [delta_w_sum + delta_w for delta_w_sum, delta_w in zip(weight_derivatives_sum,
