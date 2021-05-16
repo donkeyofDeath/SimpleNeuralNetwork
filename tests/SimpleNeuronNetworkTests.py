@@ -22,7 +22,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
                         np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])]
 
         self.second_weights = [np.array([[1, 1, 0, 0], [0, 0, 1, 1]]),
-                               np.array([1, 1])]
+                               np.array([[1, 1]])]
 
         self.layer_sizes = np.array([4, 4, 4])
         self.second_layer_sizes = np.array([4, 2, 1])
@@ -274,8 +274,8 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
         self.assertEqual(len(z_values), 2)  # Check if the list has the right length.
         # Check the z values.
-        np.testing.assert_array_almost_equal(z_values[0], np.array([1.73105858, 1.73105858, 1.73105858, 1.73105858]))
-        np.testing.assert_array_almost_equal(z_values[1], np.array([1.9214430516601156, 1.9214430516601156]))
+        np.testing.assert_array_almost_equal(z_values[0], np.array([2.46211716, 2.46211716]))
+        np.testing.assert_array_almost_equal(z_values[1], np.array([2.8428861]))
 
     def test_calculate_deltas(self):
         """
@@ -288,6 +288,20 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         deltas_last_layer = np.array([0.5, 0.5, 0.5, 0.5])  # Deltas of the last layer used for the backpropagation.
 
         deltas = self.first_neural_network.calculate_deltas(deltas_last_layer, z_values)  # All deltas.
+
+        np.testing.assert_array_almost_equal(deltas[0], np.array([0.09830597, 0.09830597, 0.09830597, 0.09830597]))
+        np.testing.assert_array_almost_equal(deltas[1], deltas_last_layer)
+
+        # Calculations for the second neural network.
+
+        z_values = [np.array([1., 1.]), np.array([1.])]  # Z values.
+
+        deltas_last_layer = np.array([0.5])  # Deltas of the last layer used for the backpropagation.
+
+        deltas = self.second_neural_network.calculate_deltas(deltas_last_layer, z_values)
+
+        np.testing.assert_array_almost_equal(deltas[0], np.array([0.09830596662074094, 0.09830596662074094]))
+        np.testing.assert_array_almost_equal(deltas[1], np.array([0.5]))
 
 
 if __name__ == "__main__":

@@ -173,9 +173,10 @@ class SimpleNeuralNetwork:
         Tested.
         One component of the gradient of a quadratic cost function with respect to the activation in the last layer of
         the neural network.
-        :param last_layer_activation:
-        :param desired_result:
-        :return:
+
+        :param last_layer_activation: The activation of the neurons in the last layer of the neural network.
+        :param desired_result: The desired activations of the neurons in the last layer of the neural network.
+        :return: last_layer_activation - desired_result.
         """
         return last_layer_activation - desired_result
 
@@ -189,7 +190,7 @@ class SimpleNeuralNetwork:
         This method checks if the shapes of the entries in weights and biases coincide with the entries in layer sizes.
         If this is not the case an according error is raised.
 
-        :return: None
+        :return: None.
         """
         # Loop through all the entries in weights.
         for n, (weight_matrix, bias_vector) in enumerate(zip(self.weights, self.biases)):
@@ -314,7 +315,7 @@ class SimpleNeuralNetwork:
         """
         activations, z_values = self.calculate_a_and_z(training_input)  # Activations and z values.
 
-        print(activations)
+        # print(activations)
         # Gradient of the cost function with respect to the activations of the last layer.
         cost_func_grad = self.cost_func_grad(activations[-1], desired_result)
 
@@ -336,6 +337,7 @@ class SimpleNeuralNetwork:
 
     def calculate_deltas(self, delta_last_layer: np.ndarray, z_values: list) -> list:
         """
+        Tested.
         This method is part of the back propagation algorithm and calculates the deltas for all the layers in the neural
         network.
 
