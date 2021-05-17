@@ -1,3 +1,3 @@
-[submodule "modules/neural-networks-and-deep-learning"]
-	path = modules/neural-networks-and-deep-learning
-	url = https://github.com/donkeyofDeath/neural-networks-and-deep-learning.git
+[submodule "modules/NeuralNetworksAndDeepLearning"]
+	path = modules/NeuralNetworksAndDeepLearning
+	url = https://github.com/donkeyofDeath/NeuralNetworksAndDeepLearning.git

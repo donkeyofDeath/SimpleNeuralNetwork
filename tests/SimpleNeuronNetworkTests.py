@@ -1,6 +1,7 @@
 import unittest as ut
 import SimpleNeuralNetwork as snn
 import numpy as np
+import modules.NeuralNetworksAndDeepLearning.src.network as nw
 
 
 class SimpleNeuralNetworkTestCase(ut.TestCase):
