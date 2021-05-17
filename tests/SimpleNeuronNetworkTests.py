@@ -28,6 +28,11 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         self.layer_sizes = np.array([4, 4, 4])
         self.second_layer_sizes = np.array([4, 2, 1])
 
+        # Neural networks to which my results are compared.
+        self.first_reference_neural_network = nw.Network(self.layer_sizes, self.weights, self.biases)
+        self.second_reference_neural_network = nw.Network(self.second_layer_sizes, self.second_weights,
+                                                          self.second_biases)
+
         # Set up the networks with parameters from above.
         self.first_neural_network = snn.SimpleNeuralNetwork(self.layer_sizes, self.weights, self.biases)
         self.second_neural_network = snn.SimpleNeuralNetwork(self.second_layer_sizes, self.second_weights,
@@ -306,28 +311,83 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
     def test_back_propagation_algorithm(self):
         """
-        Tests the back propagation algorithm for two different neural networks.
+        Tests the back propagation algorithm for two different neural networks. It uses the code by Michael Nielsen,
+        which I ported to Python 3 to check id the back propagation algorithm functions correctly.
 
         :return: None.
         """
         training_data = np.array([255., 255., 255., 255.])  # Training data, which serves as an input.
         desired_result = np.array([0., 0., 0., .1])  # Results, which represents the desired output of the network.
 
+        # Testing the first neural network.
+
+        # Calculate the the partial derivatives of the weights and biases of the network which is tested and the
+        # reference neural network.
         partial_weights, partial_biases = self.first_neural_network.back_propagation_algorithm(training_data,
                                                                                                desired_result)
-
-        print(partial_weights, partial_biases)
+        partial_biases_ref, partial_weights_ref = self.first_reference_neural_network.backprop(
+            self.first_neural_network.sigmoid_function(training_data), desired_result)
 
         # Check if the if the output have the right shapes.
         self.assertEqual(len(partial_weights), 2)
         self.assertEqual(partial_weights[0].shape, (4, 4))
         self.assertEqual(partial_weights[1].shape, (4, 4))
 
+        # Loop through all the partial derivatives and compare the testing network to the reference network.
+        for weights_der, reference_weight_der in zip(partial_weights, partial_weights_ref):
+            np.testing.assert_array_almost_equal(weights_der, reference_weight_der)
+
+        for bias_der, reference_bias_der in zip(partial_biases, partial_biases_ref):
+            np.testing.assert_array_almost_equal(bias_der, reference_bias_der)
+
+        # Testing the second neural network.
+
+        desired_result = np.array([0.5])  # Desired result used in the back propagation algorithm.
+
+        # Set up partial derivatives of the weights and biases for the reference and testing networks.
+        partial_weights, partial_biases = self.second_neural_network.back_propagation_algorithm(training_data,
+                                                                                                desired_result)
+
+        partial_biases_ref, partial_weights_ref = self.second_reference_neural_network.backprop(
+            self.second_neural_network.sigmoid_function(training_data), desired_result)
+
+        # Check if the partial derivatives have the right shapes.
+        self.assertEqual(len(partial_weights), 2)
+        self.assertEqual(partial_weights[0].shape, (2, 4))
+        self.assertEqual(partial_weights[1].shape, (1, 2))
+
+        # Loop through all the partial derivatives and compare them to the derivatives of the reference network.
+        for weights_der, reference_weight_der in zip(partial_weights, partial_weights_ref):
+            np.testing.assert_array_almost_equal(weights_der, reference_weight_der)
+
+        for bias_der, reference_bias_der in zip(partial_biases, partial_biases_ref):
+            np.testing.assert_array_almost_equal(bias_der, reference_bias_der)
+
+    def test_update_weights_and_biases(self):
+        """
 
 
+        :return:None.
+        """
+        training_data = [(np.array([1., 1., 1., 1.]), np.array([1., 0., 0., 0.])), (np.array([1., 0., 1., 1.]),
+                                                                                    np.array([0., 1., 0., 0.]))]
+        training_data_sigmoid = [(self.first_neural_network.sigmoid_function(x), y) for (x, y) in training_data]
+        mini_batch_size = 1
+        learning_rate = 3.
+        number_of_epochs = 5
 
+        print(self.first_neural_network.sigmoid_function(training_data[0][0]))
+        print(training_data_sigmoid[0][0])
 
+        self.first_neural_network.update_weight_and_biases(training_data, mini_batch_size, learning_rate)
+        self.first_reference_neural_network.update_mini_batch(training_data_sigmoid, learning_rate)
 
+        for weight_mat, weight_mat_ref in zip(self.first_neural_network.weights,
+                                              self.first_reference_neural_network.weights):
+            np.testing.assert_array_almost_equal(weight_mat, weight_mat_ref)
+
+        for bias_vec, bias_vec_ref in zip(self.first_neural_network.biases, self.first_reference_neural_network.biases):
+            np.testing.assert_array_almost_equal(bias_vec, bias_vec_ref)
 
 
 if __name__ == "__main__":
