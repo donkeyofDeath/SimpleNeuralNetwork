@@ -1,0 +1,3 @@
+[submodule "NeuralNetworkPython3"]
+	path = packages/NeuralNetworkPython3
+	url = https://github.com/donkeyofDeath/NeuralNetworksPython3.git
