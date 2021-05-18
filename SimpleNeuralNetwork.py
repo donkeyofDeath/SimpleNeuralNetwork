@@ -154,7 +154,7 @@ class SimpleNeuralNetwork:
         :param num: A real number.
         :return: The derivative of the Sigmoid function at the point num.
         """
-        return 0.25 / (np.cosh(num/2))**2
+        return 0.25 / (np.cosh(num / 2)) ** 2
 
     @staticmethod
     def sigmoid_function(num):
@@ -273,6 +273,7 @@ class SimpleNeuralNetwork:
 
     def update_weight_and_biases(self, mini_batch: list, mini_batch_size: int, grad_step_size: float) -> None:
         """
+        Tested.
         This method uses the data in a mini batch to update the weights and biases using the back propagation algorithm.
 
         :param mini_batch_size: Number of data examples in a mini batch.
@@ -316,6 +317,7 @@ class SimpleNeuralNetwork:
 
     def back_propagation_algorithm(self, training_input: np.ndarray, desired_result: np.ndarray) -> (list, list):
         """
+        Tested.
         The back propagation algorithm. Takes training data as an input an returns the partial derivatives of the
         weights and biases.
 
@@ -390,13 +392,19 @@ class SimpleNeuralNetwork:
 
         :return: Returns a tuple containing the activations and corresponding z values.
         """
-        self.current_layer = self.sigmoid_function(training_input)  # Set the current layer to the training data.
+        # self.current_layer = self.sigmoid_function(training_input)  # Set the current layer to the training data.
+        self.current_layer = training_input  # Removed the sigmoid function for the first input.
 
         # Calculate the activations for each layer in the neural network.
         activations = [self.current_layer] + [self.update(weight_mat, bias_vec) for
                                               weight_mat, bias_vec in zip(self.weights, self.biases)]
 
         # Calculate z values using the activations. The last element is dropped since this is the output layer.
+        # z_values = [np.dot(weight_mat, activation) + bias_vec if index
+        #            else self.sigmoid_function(np.dot(weight_mat, activation) + bias_vec)
+        #            for index, (weight_mat, bias_vec, activation) in enumerate(zip(self.weights, self.biases,
+        #                                                                           activations[:-1]))]
+
         z_values = [np.dot(weight_mat, activation) + bias_vec for weight_mat, bias_vec, activation in
                     zip(self.weights, self.biases, activations[:-1])]
 

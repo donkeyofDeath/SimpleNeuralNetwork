@@ -36,7 +36,7 @@ converted_desired_results = np.array([convert_number(num) for num in desired_res
 train_inputs = train_inputs.reshape(len(train_inputs), num_pixels)
 training_data = list(zip(train_inputs, converted_desired_results))
 mini_batch_size = 100
-learning_rate = 10.
+learning_rate = 3.
 epochs = 5
 
 print("Started learning.")

@@ -260,28 +260,31 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
         self.assertEqual(len(activations), 3)  # Check if the list has the right length.
         # Check the activations.
-        np.testing.assert_array_almost_equal(activations[0], np.array([0.73105858, 0.73105858, 0.73105858, 0.73105858]))
-        np.testing.assert_array_almost_equal(activations[1], np.array([0.84954777, 0.84954777, 0.84954777, 0.84954777]))
-        np.testing.assert_array_almost_equal(activations[2], np.array([0.864074, 0.864074, 0.864074, 0.864074]))
+        np.testing.assert_array_almost_equal(activations[0], np.array([1., 1., 1., 1.]))
+        np.testing.assert_array_almost_equal(activations[1], np.array([0.8807970779778823, 0.8807970779778823,
+                                                                       0.8807970779778823, 0.8807970779778823]))
+        np.testing.assert_array_almost_equal(activations[2], np.array([0.8677026536525567, 0.8677026536525567,
+                                                                       0.8677026536525567, 0.8677026536525567]))
 
         self.assertEqual(len(z_values), 2)  # Check if the list has the right length.
         # Check the z values.
-        np.testing.assert_array_almost_equal(z_values[0], np.array([1.73105858, 1.73105858, 1.73105858, 1.73105858]))
-        np.testing.assert_array_almost_equal(z_values[1], np.array([1.84954777, 1.84954777, 1.84954777, 1.84954777]))
+        np.testing.assert_array_almost_equal(z_values[0], np.array([2., 2., 2., 2.]))
+        np.testing.assert_array_almost_equal(z_values[1], np.array([1.8807970779778822, 1.8807970779778822,
+                                                                    1.8807970779778822, 1.8807970779778822]))
 
         # Calculate the activations and the z values of the second neural network.
         activations, z_values = self.second_neural_network.calculate_a_and_z(self.first_layer)
 
         self.assertEqual(len(activations), 3)  # Check if the list has the right length.
         # Check the activations.
-        np.testing.assert_array_almost_equal(activations[0], np.array([0.73105858, 0.73105858, 0.73105858, 0.73105858]))
-        np.testing.assert_array_almost_equal(activations[1], np.array([0.9214430516601156, 0.9214430516601156]))
-        np.testing.assert_array_almost_equal(activations[2], np.array([0.9449497893439537]))
+        np.testing.assert_array_almost_equal(activations[0], np.array([1., 1., 1., 1.]))
+        np.testing.assert_array_almost_equal(activations[1], np.array([0.9525741268224334, 0.9525741268224334]))
+        np.testing.assert_array_almost_equal(activations[2], np.array([0.9481003474891515]))
 
         self.assertEqual(len(z_values), 2)  # Check if the list has the right length.
         # Check the z values.
-        np.testing.assert_array_almost_equal(z_values[0], np.array([2.46211716, 2.46211716]))
-        np.testing.assert_array_almost_equal(z_values[1], np.array([2.8428861]))
+        np.testing.assert_array_almost_equal(z_values[0], np.array([3., 3.]))
+        np.testing.assert_array_almost_equal(z_values[1], np.array([2.9051482536448665]))
 
     def test_calculate_deltas(self):
         """
@@ -325,8 +328,8 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         # reference neural network.
         partial_weights, partial_biases = self.first_neural_network.back_propagation_algorithm(training_data,
                                                                                                desired_result)
-        partial_biases_ref, partial_weights_ref = self.first_reference_neural_network.backprop(
-            self.first_neural_network.sigmoid_function(training_data), desired_result)
+        partial_biases_ref, partial_weights_ref = self.first_reference_neural_network.backprop(training_data,
+                                                                                               desired_result)
 
         # Check if the if the output have the right shapes.
         self.assertEqual(len(partial_weights), 2)
@@ -348,8 +351,8 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         partial_weights, partial_biases = self.second_neural_network.back_propagation_algorithm(training_data,
                                                                                                 desired_result)
 
-        partial_biases_ref, partial_weights_ref = self.second_reference_neural_network.backprop(
-            self.second_neural_network.sigmoid_function(training_data), desired_result)
+        partial_biases_ref, partial_weights_ref = self.second_reference_neural_network.backprop(training_data,
+                                                                                                desired_result)
 
         # Check if the partial derivatives have the right shapes.
         self.assertEqual(len(partial_weights), 2)
@@ -365,25 +368,35 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
     def test_update_weights_and_biases(self):
         """
-
+        This method tests the update_weights_and_biases method which is used in the learning algorithm to update the
+        weights and biases with the help of the gradient of a mini batch. The test is performed using two different
+        neural networks and their references.
 
         :return:None.
         """
-        training_data = [(np.array([1., 1., 1., 1.]), np.array([1., 0., 0., 0.])), (np.array([1., 0., 1., 1.]),
-                                                                                    np.array([0., 1., 0., 0.]))]
+        # Training data for this test.
+        training_data = [(np.array([255., 255., 255., 255.]), np.array([1., 0., 0., 0.])),
+                         (np.array([255., 0., 255., 255.]), np.array([0., 1., 0., 0.]))]
+
+        # The training data has to be run through the sigmoid function, since Michael Nielsen's Neural Network doesn't
+        # run the first input through the sigmoid function.
         training_data_sigmoid = [(self.first_neural_network.sigmoid_function(x), y) for (x, y) in training_data]
-        mini_batch_size = 1
-        learning_rate = 3.
-        number_of_epochs = 5
+        mini_batch_size = len(training_data)
+        learning_rate = 3.  # Learning rate, which is the variable eta in gradient descent.
 
-        print(self.first_neural_network.sigmoid_function(training_data[0][0]))
-        print(training_data_sigmoid[0][0])
+        # print(self.first_neural_network.weights)
 
+        # Setup the neural networks.
         self.first_neural_network.update_weight_and_biases(training_data, mini_batch_size, learning_rate)
-        self.first_reference_neural_network.update_mini_batch(training_data_sigmoid, learning_rate)
+        self.first_reference_neural_network.update_mini_batch(training_data, learning_rate)
 
+        # print(self.first_neural_network.weights)
+
+        # Loop through all the weights and biases of the first neural network and compare them to the ones of the
+        # reference network.
         for weight_mat, weight_mat_ref in zip(self.first_neural_network.weights,
                                               self.first_reference_neural_network.weights):
+            # print(weight_mat)
             np.testing.assert_array_almost_equal(weight_mat, weight_mat_ref)
 
         for bias_vec, bias_vec_ref in zip(self.first_neural_network.biases, self.first_reference_neural_network.biases):
