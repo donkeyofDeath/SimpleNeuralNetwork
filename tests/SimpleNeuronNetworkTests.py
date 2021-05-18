@@ -1,7 +1,7 @@
 import unittest as ut
 import SimpleNeuralNetwork as snn
 import numpy as np
-import modules.NeuralNetworksAndDeepLearning.src.network as nw
+import packages.NeuralNetworkPython3.chapter1_2.Network as nw
 
 
 class SimpleNeuralNetworkTestCase(ut.TestCase):
@@ -449,7 +449,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         epochs = 3
 
         self.first_neural_network.learn(training_data, mini_batch_size, epochs, self.learning_rate)
-        self.first_reference_neural_network.SGD(training_data, epochs, mini_batch_size, self.learning_rate)
+        self.first_reference_neural_network.learn(training_data, epochs, mini_batch_size, self.learning_rate)
 
         for weight_mat, weight_mat_ref in zip(self.first_neural_network.weights,
                                               self.first_reference_neural_network.weights):
