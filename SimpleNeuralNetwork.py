@@ -154,7 +154,7 @@ class SimpleNeuralNetwork:
         :param num: A real number.
         :return: The derivative of the Sigmoid function at the point num.
         """
-        return 0.25 / (np.cosh(num / 2)) ** 2
+        return 0.5 / (1. + np.cosh(num))
 
     @staticmethod
     def sigmoid_function(num):
@@ -244,8 +244,7 @@ class SimpleNeuralNetwork:
 
         return self.current_layer
 
-    def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, grad_step_size: float) \
-            -> (list, list):
+    def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, grad_step_size: float):
         """
         This method is the heart of this class. It "teaches" the neural network using the training data which is
         separated into mini batches of the size mini_batch_size. The weights and biases of the network are updated
@@ -255,9 +254,10 @@ class SimpleNeuralNetwork:
         :param mini_batch_size: Number of training examples in a mini batch.
         :param number_of_epochs: How many times the network runs through the training examples.
         :param grad_step_size: The step size used in the gradient descent. In formulas it is often the greek letter eta.
-        :return: A tuple containing the weights an biases.
+        :return: None.
         """
         number_of_training_examples = len(learning_data)
+
         for _ in range(number_of_epochs):
 
             rand.shuffle(learning_data)  # Randomly shuffle the training data
@@ -268,8 +268,6 @@ class SimpleNeuralNetwork:
             for mini_batch in mini_batches:
                 # Updates the weights and biases after going through the training data of a mini batch.
                 self.update_weight_and_biases(mini_batch, mini_batch_size, grad_step_size)
-
-        return self.weights, self.biases
 
     def update_weight_and_biases(self, mini_batch: list, mini_batch_size: int, grad_step_size: float) -> None:
         """

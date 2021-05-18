@@ -1,6 +1,7 @@
 from keras.datasets import mnist
 import numpy as np
 import SimpleNeuralNetwork as snn
+import modules.NeuralNetworksAndDeepLearning.src.network as nn
 
 num_pixels = 784  # Number of pixels in a training images.
 num_output_neurons = 10  # Number of neurons in the output layer.
@@ -35,36 +36,30 @@ converted_desired_results = np.array([convert_number(num) for num in desired_res
 # train_inputs = np.ndarray([data.reshape(num_pixels) for data in train_inputs])
 train_inputs = train_inputs.reshape(len(train_inputs), num_pixels)
 training_data = list(zip(train_inputs, converted_desired_results))
-mini_batch_size = 100
+mini_batch_size = 1000
 learning_rate = 3.
-epochs = 5
+epochs = 10
 
 print("Started learning.")
-# Let the neural network learn.
-new_weights, new_biases = neural_network.learn(training_data, mini_batch_size, epochs, learning_rate)
+neural_network.learn(training_data, mini_batch_size, epochs, learning_rate)  # Let the neural network learn.
 print("Finished learning.")
 
-print(new_weights, new_biases)
+print(neural_network.weights, neural_network.biases)
 
 # Test the neural network by going through the test images and counting the number of rightly classified images.
 result_counter = 0
 test_X = test_X.reshape(len(test_X), num_pixels)
 
+verification_data = list(zip(test_X, test_y))
 
-def sigmoid(x):
-    return 1. / (1. + np.exp(-x))
-
-
-# print(test_X[0])
-# print(sigmoid(test_X[0]))
-# sigmoid(neural_network.biases[0])
-# sigmoid(neural_network.weights[0])
-
-for data, desired_result in zip(test_X, test_y):
+for data, desired_result in verification_data:
 
     last_layer_activation = neural_network.feed_forward(data)
     # print(last_layer_activation)
     if desired_result == np.argmax(last_layer_activation):
         result_counter += 1
 
-print(f"{result_counter} of {len(test_X)} test images were verified correctly.")
+print(f"{result_counter} of {len(test_X)} test images were verified correctly by my net work.")
+
+reference_neural_network = nn.Network(layer_sizes, weights, biases)
+reference_neural_network.SGD(training_data, epochs, mini_batch_size, learning_rate, test_data=verification_data)

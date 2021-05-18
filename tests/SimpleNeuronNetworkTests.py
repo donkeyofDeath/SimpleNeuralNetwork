@@ -434,7 +434,8 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         """
         Tests if the learning algorithm of the neural networks is implemented correctly by comparing the output of the
         learn method with the result of the SGD method written by Michael Nielsen. This is done for two different neural
-        networks.
+        networks. I just realised that it is very difficult to test this method since it randomly shuffles the training
+        data.
 
         :return: None.
         """
