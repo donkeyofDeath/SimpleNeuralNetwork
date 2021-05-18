@@ -14,6 +14,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
         :return: None
         """
+        self.learning_rate = 3.  # Learning rate, which is the variable eta in gradient descent.
         self.first_layer = np.array([1, 1, 1, 1])  # The input is the same for both neural networks.
 
         self.biases = [np.array([1, 1, 1, 1]), np.array([1, 1, 1, 1])]
@@ -374,21 +375,21 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
         :return:None.
         """
+        # --------------------------------
+        # Testing the first neural network
+        # --------------------------------
+
         # Training data for this test.
         training_data = [(np.array([255., 255., 255., 255.]), np.array([1., 0., 0., 0.])),
                          (np.array([255., 0., 255., 255.]), np.array([0., 1., 0., 0.]))]
 
-        # The training data has to be run through the sigmoid function, since Michael Nielsen's Neural Network doesn't
-        # run the first input through the sigmoid function.
-        training_data_sigmoid = [(self.first_neural_network.sigmoid_function(x), y) for (x, y) in training_data]
-        mini_batch_size = len(training_data)
-        learning_rate = 3.  # Learning rate, which is the variable eta in gradient descent.
+        mini_batch_size = len(training_data)  # Number of elements in a mini batch.
 
         # print(self.first_neural_network.weights)
 
         # Setup the neural networks.
-        self.first_neural_network.update_weight_and_biases(training_data, mini_batch_size, learning_rate)
-        self.first_reference_neural_network.update_mini_batch(training_data, learning_rate)
+        self.first_neural_network.update_weight_and_biases(training_data, mini_batch_size, self.learning_rate)
+        self.first_reference_neural_network.update_mini_batch(training_data, self.learning_rate)
 
         # print(self.first_neural_network.weights)
 
@@ -396,11 +397,62 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         # reference network.
         for weight_mat, weight_mat_ref in zip(self.first_neural_network.weights,
                                               self.first_reference_neural_network.weights):
-            # print(weight_mat)
             np.testing.assert_array_almost_equal(weight_mat, weight_mat_ref)
 
         for bias_vec, bias_vec_ref in zip(self.first_neural_network.biases, self.first_reference_neural_network.biases):
             np.testing.assert_array_almost_equal(bias_vec, bias_vec_ref)
+
+        # ---------------------------------
+        # Testing the second neural network
+        # ---------------------------------
+
+        # Training data for this test.
+        training_data = [(np.array([255., 255., 255., 255.]), np.array([1.])),
+                         (np.array([255., 0., 255., 255.]), np.array([0.]))]
+
+        mini_batch_size = len(training_data)  # Number of elements in a mini batch.
+
+        # print(self.first_neural_network.weights)
+
+        # Setup the neural networks.
+        self.second_neural_network.update_weight_and_biases(training_data, mini_batch_size, self.learning_rate)
+        self.second_reference_neural_network.update_mini_batch(training_data, self.learning_rate)
+
+        # print(self.first_neural_network.weights)
+
+        # Loop through all the weights and biases of the first neural network and compare them to the ones of the
+        # reference network.
+        for weight_mat, weight_mat_ref in zip(self.second_neural_network.weights,
+                                              self.second_reference_neural_network.weights):
+            np.testing.assert_array_almost_equal(weight_mat, weight_mat_ref)
+
+        for bias_vec, bias_vec_ref in zip(self.second_neural_network.biases,
+                                          self.second_reference_neural_network.biases):
+            np.testing.assert_array_almost_equal(bias_vec, bias_vec_ref)
+
+    def test_learn(self):
+        """
+        Tests if the learning algorithm of the neural networks is implemented correctly by comparing the output of the
+        learn method with the result of the SGD method written by Michael Nielsen. This is done for two different neural
+        networks.
+
+        :return: None.
+        """
+        # Training data for this test.
+        training_data = [(np.array([255., 255., 255., 255.]), np.array([1., 0., 0., 0.])),
+                         (np.array([255., 0., 255., 255.]), np.array([0., 1., 0., 0.])),
+                         (np.array([0., 255., 199., 255.]), np.array([0., 0., 1., 0.])),
+                         (np.array([255., 255., 0., 255.]), np.array([0., 0., 0., 1.]))]
+
+        mini_batch_size = 2
+        epochs = 3
+
+        self.first_neural_network.learn(training_data, mini_batch_size, epochs, self.learning_rate)
+        self.first_reference_neural_network.SGD(training_data, epochs, mini_batch_size, self.learning_rate)
+
+        for weight_mat, weight_mat_ref in zip(self.first_neural_network.weights,
+                                              self.first_reference_neural_network.weights):
+            np.testing.assert_array_almost_equal(weight_mat, weight_mat_ref)
 
 
 if __name__ == "__main__":
