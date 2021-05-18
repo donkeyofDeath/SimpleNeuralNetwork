@@ -258,7 +258,7 @@ class SimpleNeuralNetwork:
         """
         number_of_training_examples = len(learning_data)
 
-        for _ in range(number_of_epochs):
+        for index in range(number_of_epochs):
 
             rand.shuffle(learning_data)  # Randomly shuffle the training data
 
@@ -268,6 +268,8 @@ class SimpleNeuralNetwork:
             for mini_batch in mini_batches:
                 # Updates the weights and biases after going through the training data of a mini batch.
                 self.update_weight_and_biases(mini_batch, mini_batch_size, grad_step_size)
+
+            print(f"Epoch {index} finished.")
 
     def update_weight_and_biases(self, mini_batch: list, mini_batch_size: int, grad_step_size: float) -> None:
         """
