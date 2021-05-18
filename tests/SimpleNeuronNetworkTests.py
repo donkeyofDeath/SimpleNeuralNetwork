@@ -4,6 +4,16 @@ import numpy as np
 import packages.NeuralNetworkPython3.chapter1_2.Network as nw
 
 
+def convert_array(array: np.array) -> np.array:
+    """
+    Convert a 1D numpy array into a 2D matrix with one column.
+
+    :param array: 1D numpy array
+    :return: 2D numpy column array with the same entry.
+    """
+    return np.reshape(array, (len(array), 1))
+
+
 class SimpleNeuralNetworkTestCase(ut.TestCase):
 
     def setUp(self) -> None:
@@ -16,9 +26,12 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         """
         self.learning_rate = 3.  # Learning rate, which is the variable eta in gradient descent.
         self.first_layer = np.array([1, 1, 1, 1])  # The input is the same for both neural networks.
+        self.reference_first_layer = convert_array(self.first_layer)
 
         self.biases = [np.array([1, 1, 1, 1]), np.array([1, 1, 1, 1])]
+        self.reference_biases = [convert_array(array) for array in self.biases]
         self.second_biases = [np.array([1, 1]), np.array([1])]
+        self.reference_second_biases = [convert_array(array) for array in self.second_biases]
 
         self.weights = [np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]),
                         np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])]
@@ -30,9 +43,9 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         self.second_layer_sizes = np.array([4, 2, 1])
 
         # Neural networks to which my results are compared.
-        self.first_reference_neural_network = nw.Network(self.layer_sizes, self.weights, self.biases)
+        self.first_reference_neural_network = nw.Network(self.layer_sizes, self.weights, self.reference_biases)
         self.second_reference_neural_network = nw.Network(self.second_layer_sizes, self.second_weights,
-                                                          self.second_biases)
+                                                          self.reference_second_biases)
 
         # Set up the networks with parameters from above.
         self.first_neural_network = snn.SimpleNeuralNetwork(self.layer_sizes, self.weights, self.biases)
@@ -323,14 +336,16 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         training_data = np.array([255., 255., 255., 255.])  # Training data, which serves as an input.
         desired_result = np.array([0., 0., 0., .1])  # Results, which represents the desired output of the network.
 
+        reference_training_data = convert_array(training_data)
+        reference_desired_result = convert_array(desired_result)
         # Testing the first neural network.
 
         # Calculate the the partial derivatives of the weights and biases of the network which is tested and the
         # reference neural network.
         partial_weights, partial_biases = self.first_neural_network.back_propagation_algorithm(training_data,
                                                                                                desired_result)
-        partial_biases_ref, partial_weights_ref = self.first_reference_neural_network.backprop(training_data,
-                                                                                               desired_result)
+        partial_biases_ref, partial_weights_ref = self.first_reference_neural_network.backprop(reference_training_data,
+                                                                                               reference_desired_result)
 
         # Check if the if the output have the right shapes.
         self.assertEqual(len(partial_weights), 2)
@@ -342,7 +357,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
             np.testing.assert_array_almost_equal(weights_der, reference_weight_der)
 
         for bias_der, reference_bias_der in zip(partial_biases, partial_biases_ref):
-            np.testing.assert_array_almost_equal(bias_der, reference_bias_der)
+            np.testing.assert_array_almost_equal(bias_der, np.reshape(reference_bias_der, (len(reference_bias_der,))))
 
         # Testing the second neural network.
 
@@ -352,8 +367,8 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         partial_weights, partial_biases = self.second_neural_network.back_propagation_algorithm(training_data,
                                                                                                 desired_result)
 
-        partial_biases_ref, partial_weights_ref = self.second_reference_neural_network.backprop(training_data,
-                                                                                                desired_result)
+        partial_biases_ref, partial_weights_ref = self.second_reference_neural_network.backprop(reference_training_data,
+                                                                                                reference_desired_result)
 
         # Check if the partial derivatives have the right shapes.
         self.assertEqual(len(partial_weights), 2)
@@ -365,7 +380,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
             np.testing.assert_array_almost_equal(weights_der, reference_weight_der)
 
         for bias_der, reference_bias_der in zip(partial_biases, partial_biases_ref):
-            np.testing.assert_array_almost_equal(bias_der, reference_bias_der)
+            np.testing.assert_array_almost_equal(bias_der, np.reshape(reference_bias_der, (len(reference_bias_der),)))
 
     def test_update_weights_and_biases(self):
         """
@@ -383,13 +398,15 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         training_data = [(np.array([255., 255., 255., 255.]), np.array([1., 0., 0., 0.])),
                          (np.array([255., 0., 255., 255.]), np.array([0., 1., 0., 0.]))]
 
+        reference_training_data = [(convert_array(x), convert_array(y)) for x, y in training_data]
+
         mini_batch_size = len(training_data)  # Number of elements in a mini batch.
 
-        # print(self.first_neural_network.weights)
+        print(reference_training_data)
 
         # Setup the neural networks.
         self.first_neural_network.update_weight_and_biases(training_data, mini_batch_size, self.learning_rate)
-        self.first_reference_neural_network.update_mini_batch(training_data, self.learning_rate)
+        self.first_reference_neural_network.update_mini_batch(reference_training_data, self.learning_rate)
 
         # print(self.first_neural_network.weights)
 
@@ -430,7 +447,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
                                           self.second_reference_neural_network.biases):
             np.testing.assert_array_almost_equal(bias_vec, bias_vec_ref)
 
-    def test_learn(self):
+    def learn(self):
         """
         Tests if the learning algorithm of the neural networks is implemented correctly by comparing the output of the
         learn method with the result of the SGD method written by Michael Nielsen. This is done for two different neural
