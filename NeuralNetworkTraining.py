@@ -3,44 +3,53 @@ import SimpleNeuralNetwork as snn
 import packages.NeuralNetworkPython3.chapter1_2.Network as nn
 import loadMnistData as lmd
 
-num_pixels, training_data, verification_data = lmd.load_data()
 
-num_output_neurons = 10  # Number of neurons in the output layer.
-layer_sizes = np.array([784, 10])  # Sizes of the layers in the neural network.
+# -------------------
+# Declaring constants
+# -------------------
 
-weights = [np.random.rand(num_output_neurons, num_pixels)]  # Weights used in the neural network.
-biases = [np.random.rand(num_output_neurons)]  # Biases used in the neural networks.
+NUM_PIXELS, training_data, verification_data = lmd.load_data()  # Load the MNIST data.
 
-neural_network = snn.SimpleNeuralNetwork(layer_sizes, weights, biases)  # Define the neural network.
+MINI_BATCH_SIZE = 10  # Size of the mini batches used in the stochastic gradient descent.
+LEARNING_RATE = 3.  # Learning rate often declared by an eta.
+EPOCHS = 3  # Number of epochs used in the stochastic gradient descent.
+NUM_OUTPUT_NEURONS = 10  # Number of neurons in the output layer.
+LAYER_SIZES = np.array([NUM_PIXELS, NUM_OUTPUT_NEURONS])  # Sizes of the layers in the neural network.
 
-mini_batch_size = 10
-learning_rate = 3.
-epochs = 3
+# ------------------------
+# Setup the neural network
+# ------------------------
+
+
+weights = [np.random.rand(NUM_OUTPUT_NEURONS, NUM_PIXELS)]  # Weights used in the neural network.
+biases = [np.random.rand(NUM_OUTPUT_NEURONS)]  # Biases used in the neural networks.
+
+neural_network = snn.SimpleNeuralNetwork(LAYER_SIZES, weights, biases)  # Define the neural network.
+
+# ----------------------------------
+# Train the network and view results
+# ----------------------------------
 
 print("Started learning.")
-neural_network.learn(training_data, mini_batch_size, epochs, learning_rate)  # Let the neural network learn.
+neural_network.learn(training_data, MINI_BATCH_SIZE, EPOCHS, LEARNING_RATE)  # Let the neural network learn.
 print("Finished learning.")
 
-# print(neural_network.weights, neural_network.biases)
-
 # Test the neural network by going through the test images and counting the number of rightly classified images.
-result_counter = 0
+result_counter = sum([result == np.argmax(neural_network.feed_forward(data)) for data, result in verification_data])
 
-for data, desired_result in verification_data:
+# Print the result of how many images are identified correctly.
+print(f"{result_counter} of {len(verification_data)} test images were verified correctly by my net work.")
 
-    last_layer_activation = neural_network.feed_forward(data)
-    # print(last_layer_activation)
-    if desired_result == np.argmax(last_layer_activation):
-        result_counter += 1
+# ---------------------------------
+# Setup and train reference network
+# ---------------------------------
 
-sum_counter = sum([result == np.argmax(neural_network.feed_forward(data)) for data, result in verification_data])
-
-print(f"{result_counter}, {sum_counter} of {len(verification_data)} test images were verified correctly by my net work.")
-
-reference_neural_network = nn.Network(layer_sizes, weights, [snn.convert_array(bias_vec) for bias_vec in biases])
+# Declare network.
+reference_neural_network = nn.Network(LAYER_SIZES, weights, [snn.convert_array(bias_vec) for bias_vec in biases])
 
 # Convert format of the data.
 training_data = [(snn.convert_array(x), snn.convert_array(y)) for x, y in training_data]
 verification_data = [(snn.convert_array(x), y) for x, y in verification_data]
 
-reference_neural_network.learn(training_data, epochs, mini_batch_size, learning_rate, test_data=verification_data)
+# Train the network.
+reference_neural_network.learn(training_data, EPOCHS, MINI_BATCH_SIZE, LEARNING_RATE, test_data=verification_data)
