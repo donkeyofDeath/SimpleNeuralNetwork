@@ -362,6 +362,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         # Testing the second neural network.
 
         desired_result = np.array([0.5])  # Desired result used in the back propagation algorithm.
+        reference_desired_result = convert_array(desired_result)
 
         # Set up partial derivatives of the weights and biases for the reference and testing networks.
         partial_weights, partial_biases = self.second_neural_network.back_propagation_algorithm(training_data,
