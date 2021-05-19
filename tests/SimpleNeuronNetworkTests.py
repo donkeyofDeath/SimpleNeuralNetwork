@@ -4,16 +4,6 @@ import numpy as np
 import packages.NeuralNetworkPython3.chapter1_2.Network as nw
 
 
-def convert_array(array: np.array) -> np.array:
-    """
-    Convert a 1D numpy array into a 2D matrix with one column.
-
-    :param array: 1D numpy array
-    :return: 2D numpy column array with the same entry.
-    """
-    return np.reshape(array, (len(array), 1))
-
-
 class SimpleNeuralNetworkTestCase(ut.TestCase):
 
     def setUp(self) -> None:
@@ -26,12 +16,12 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         """
         self.learning_rate = 3.  # Learning rate, which is the variable eta in gradient descent.
         self.first_layer = np.array([1, 1, 1, 1])  # The input is the same for both neural networks.
-        self.reference_first_layer = convert_array(self.first_layer)
+        self.reference_first_layer = snn.convert_array(self.first_layer)
 
         self.biases = [np.array([1, 1, 1, 1]), np.array([1, 1, 1, 1])]
-        self.reference_biases = [convert_array(array) for array in self.biases]
+        self.reference_biases = [snn.convert_array(array) for array in self.biases]
         self.second_biases = [np.array([1, 1]), np.array([1])]
-        self.reference_second_biases = [convert_array(array) for array in self.second_biases]
+        self.reference_second_biases = [snn.convert_array(array) for array in self.second_biases]
 
         self.weights = [np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]),
                         np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])]
@@ -336,8 +326,8 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         training_data = np.array([255., 255., 255., 255.])  # Training data, which serves as an input.
         desired_result = np.array([0., 0., 0., .1])  # Results, which represents the desired output of the network.
 
-        reference_training_data = convert_array(training_data)
-        reference_desired_result = convert_array(desired_result)
+        reference_training_data = snn.convert_array(training_data)
+        reference_desired_result = snn.convert_array(desired_result)
         # Testing the first neural network.
 
         # Calculate the the partial derivatives of the weights and biases of the network which is tested and the
@@ -357,12 +347,12 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
             np.testing.assert_array_almost_equal(weights_der, reference_weight_der)
 
         for bias_der, reference_bias_der in zip(partial_biases, partial_biases_ref):
-            np.testing.assert_array_almost_equal(convert_array(bias_der), reference_bias_der)
+            np.testing.assert_array_almost_equal(snn.convert_array(bias_der), reference_bias_der)
 
         # Testing the second neural network.
 
         desired_result = np.array([0.5])  # Desired result used in the back propagation algorithm.
-        reference_desired_result = convert_array(desired_result)
+        reference_desired_result = snn.convert_array(desired_result)
 
         # Set up partial derivatives of the weights and biases for the reference and testing networks.
         partial_weights, partial_biases = self.second_neural_network.back_propagation_algorithm(training_data,
@@ -381,7 +371,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
             np.testing.assert_array_almost_equal(weights_der, reference_weight_der)
 
         for bias_der, reference_bias_der in zip(partial_biases, partial_biases_ref):
-            np.testing.assert_array_almost_equal(convert_array(bias_der), reference_bias_der)
+            np.testing.assert_array_almost_equal(snn.convert_array(bias_der), reference_bias_der)
 
     def test_update_weights_and_biases(self):
         """
@@ -399,7 +389,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         training_data = [(np.array([255., 255., 255., 255.]), np.array([1., 0., 0., 0.])),
                          (np.array([255., 0., 255., 255.]), np.array([0., 1., 0., 0.]))]
 
-        reference_training_data = [(convert_array(x), convert_array(y)) for x, y in training_data]
+        reference_training_data = [(snn.convert_array(x), snn.convert_array(y)) for x, y in training_data]
 
         mini_batch_size = len(training_data)  # Number of elements in a mini batch.
 
@@ -416,7 +406,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
             np.testing.assert_array_almost_equal(weight_mat, weight_mat_ref)
 
         for bias_vec, bias_vec_ref in zip(self.first_neural_network.biases, self.first_reference_neural_network.biases):
-            np.testing.assert_array_almost_equal(convert_array(bias_vec), bias_vec_ref)
+            np.testing.assert_array_almost_equal(snn.convert_array(bias_vec), bias_vec_ref)
 
         # ---------------------------------
         # Testing the second neural network
@@ -426,7 +416,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         training_data = [(np.array([255., 255., 255., 255.]), np.array([1.])),
                          (np.array([255., 0., 255., 255.]), np.array([0.]))]
 
-        reference_training_data = [(convert_array(x), convert_array(y)) for x, y in training_data]
+        reference_training_data = [(snn.convert_array(x), snn.convert_array(y)) for x, y in training_data]
 
         mini_batch_size = len(training_data)  # Number of elements in a mini batch.
 
@@ -442,7 +432,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
         for bias_vec, bias_vec_ref in zip(self.second_neural_network.biases,
                                           self.second_reference_neural_network.biases):
-            np.testing.assert_array_almost_equal(convert_array(bias_vec), bias_vec_ref)
+            np.testing.assert_array_almost_equal(snn.convert_array(bias_vec), bias_vec_ref)
 
     def test_learn(self):
         """
@@ -468,7 +458,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
                          (np.array([255., 255., 0., 255.]), np.array([0., 0., 0., 1.]))]
 
         # Convert the arrays into the format Michael Nielsen uses.
-        reference_training_data = [(convert_array(x), convert_array(y)) for x, y in training_data]
+        reference_training_data = [(snn.convert_array(x), snn.convert_array(y)) for x, y in training_data]
 
         # Train a network and its reference using the corresponding training data.
         self.first_neural_network.learn(training_data, mini_batch_size, epochs, self.learning_rate, shuffle_flag=False)
@@ -482,7 +472,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
         # Compare all the biases to their reference.
         for bias_vec, bias_vec_ref in zip(self.first_neural_network.biases, self.first_reference_neural_network.biases):
-            np.testing.assert_array_almost_equal(convert_array(bias_vec), bias_vec_ref)
+            np.testing.assert_array_almost_equal(snn.convert_array(bias_vec), bias_vec_ref)
 
         # ---------------------
         # Second neural network
@@ -495,7 +485,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
                          (np.array([255., 255., 0., 255.]), np.array([0.]))]
 
         # Convert the format of the training data to the format Michael Nielsen is using.
-        reference_training_data = [(convert_array(x), convert_array(y)) for x, y in training_data]
+        reference_training_data = [(snn.convert_array(x), snn.convert_array(y)) for x, y in training_data]
 
         # Train the networks using the corresponding training data.
         self.second_neural_network.learn(training_data, mini_batch_size, epochs, self.learning_rate, shuffle_flag=False)
@@ -509,7 +499,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
         # Compare all the biases to their references.
         for bias_vec, bias_vec_ref in zip(self.second_neural_network.biases, self.second_reference_neural_network.biases):
-            np.testing.assert_array_almost_equal(convert_array(bias_vec), bias_vec_ref)
+            np.testing.assert_array_almost_equal(snn.convert_array(bias_vec), bias_vec_ref)
 
 
 if __name__ == "__main__":

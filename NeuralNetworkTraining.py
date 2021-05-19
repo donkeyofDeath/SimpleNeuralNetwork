@@ -4,16 +4,6 @@ import SimpleNeuralNetwork as snn
 import packages.NeuralNetworkPython3.chapter1_2.Network as nn
 
 
-def convert_array(array: np.array) -> np.array:
-    """
-    Convert a 1D numpy array into a 2D matrix with one column.
-
-    :param array: 1D numpy array
-    :return: 2D numpy column array with the same entry.
-    """
-    return np.reshape(array, (len(array), 1))
-
-
 num_pixels = 784  # Number of pixels in a training images.
 num_output_neurons = 10  # Number of neurons in the output layer.
 layer_sizes = np.array([784, 10])  # Sizes of the layers in the neural network.
@@ -72,10 +62,10 @@ for data, desired_result in verification_data:
 
 print(f"{result_counter} of {len(test_X)} test images were verified correctly by my net work.")
 
-reference_neural_network = nn.Network(layer_sizes, weights, [convert_array(bias_vec) for bias_vec in biases])
+reference_neural_network = nn.Network(layer_sizes, weights, [snn.convert_array(bias_vec) for bias_vec in biases])
 
 # Convert format of the data.
-training_data = [(convert_array(x), convert_array(y)) for x, y in training_data]
-verification_data = [(convert_array(x), y) for x, y in verification_data]
+training_data = [(snn.convert_array(x), snn.convert_array(y)) for x, y in training_data]
+verification_data = [(snn.convert_array(x), y) for x, y in verification_data]
 
 reference_neural_network.learn(training_data, epochs, mini_batch_size, learning_rate, test_data=verification_data)

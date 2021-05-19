@@ -2,6 +2,16 @@ import numpy as np
 import random as rand
 
 
+def convert_array(array: np.array) -> np.array:
+    """
+    Convert a 1D numpy array into a 2D matrix with one column.
+
+    :param array: 1D numpy array
+    :return: 2D numpy column array with the same entry.
+    """
+    return np.reshape(array, (len(array), 1))
+
+
 class SimpleNeuralNetwork:
 
     def __init__(self, layer_sizes: np.ndarray, weight_list: list, bias_list: list) -> None:
