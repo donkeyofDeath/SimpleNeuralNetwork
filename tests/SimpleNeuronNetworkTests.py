@@ -357,7 +357,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
             np.testing.assert_array_almost_equal(weights_der, reference_weight_der)
 
         for bias_der, reference_bias_der in zip(partial_biases, partial_biases_ref):
-            np.testing.assert_array_almost_equal(bias_der, np.reshape(reference_bias_der, (len(reference_bias_der,))))
+            np.testing.assert_array_almost_equal(convert_array(bias_der), reference_bias_der)
 
         # Testing the second neural network.
 
@@ -381,7 +381,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
             np.testing.assert_array_almost_equal(weights_der, reference_weight_der)
 
         for bias_der, reference_bias_der in zip(partial_biases, partial_biases_ref):
-            np.testing.assert_array_almost_equal(bias_der, np.reshape(reference_bias_der, (len(reference_bias_der),)))
+            np.testing.assert_array_almost_equal(convert_array(bias_der), reference_bias_der)
 
     def test_update_weights_and_biases(self):
         """
@@ -403,8 +403,6 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
         mini_batch_size = len(training_data)  # Number of elements in a mini batch.
 
-        print(reference_training_data)
-
         # Setup the neural networks.
         self.first_neural_network.update_weight_and_biases(training_data, mini_batch_size, self.learning_rate)
         self.first_reference_neural_network.update_mini_batch(reference_training_data, self.learning_rate)
@@ -418,7 +416,7 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
             np.testing.assert_array_almost_equal(weight_mat, weight_mat_ref)
 
         for bias_vec, bias_vec_ref in zip(self.first_neural_network.biases, self.first_reference_neural_network.biases):
-            np.testing.assert_array_almost_equal(bias_vec, bias_vec_ref)
+            np.testing.assert_array_almost_equal(convert_array(bias_vec), bias_vec_ref)
 
         # ---------------------------------
         # Testing the second neural network
@@ -428,13 +426,15 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         training_data = [(np.array([255., 255., 255., 255.]), np.array([1.])),
                          (np.array([255., 0., 255., 255.]), np.array([0.]))]
 
+        reference_training_data = [(convert_array(x), convert_array(y)) for x, y in training_data]
+
         mini_batch_size = len(training_data)  # Number of elements in a mini batch.
 
         # print(self.first_neural_network.weights)
 
         # Setup the neural networks.
         self.second_neural_network.update_weight_and_biases(training_data, mini_batch_size, self.learning_rate)
-        self.second_reference_neural_network.update_mini_batch(training_data, self.learning_rate)
+        self.second_reference_neural_network.update_mini_batch(reference_training_data, self.learning_rate)
 
         # print(self.first_neural_network.weights)
 
@@ -446,9 +446,9 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
         for bias_vec, bias_vec_ref in zip(self.second_neural_network.biases,
                                           self.second_reference_neural_network.biases):
-            np.testing.assert_array_almost_equal(bias_vec, bias_vec_ref)
+            np.testing.assert_array_almost_equal(convert_array(bias_vec), bias_vec_ref)
 
-    def learn(self):
+    def test_learn(self):
         """
         Tests if the learning algorithm of the neural networks is implemented correctly by comparing the output of the
         learn method with the result of the SGD method written by Michael Nielsen. This is done for two different neural
@@ -463,11 +463,13 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
                          (np.array([0., 255., 199., 255.]), np.array([0., 0., 1., 0.])),
                          (np.array([255., 255., 0., 255.]), np.array([0., 0., 0., 1.]))]
 
+        reference_training_data = [(convert_array(x), convert_array(y)) for x, y in training_data]
+
         mini_batch_size = 2
         epochs = 3
 
         self.first_neural_network.learn(training_data, mini_batch_size, epochs, self.learning_rate)
-        self.first_reference_neural_network.learn(training_data, epochs, mini_batch_size, self.learning_rate)
+        self.first_reference_neural_network.learn(reference_training_data, epochs, mini_batch_size, self.learning_rate)
 
         for weight_mat, weight_mat_ref in zip(self.first_neural_network.weights,
                                               self.first_reference_neural_network.weights):

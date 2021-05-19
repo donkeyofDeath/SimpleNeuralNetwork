@@ -244,7 +244,8 @@ class SimpleNeuralNetwork:
 
         return self.current_layer
 
-    def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, grad_step_size: float):
+    def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, grad_step_size: float,
+              shuffle_flag: bool=True):
         """
         This method is the heart of this class. It "teaches" the neural network using the training data which is
         separated into mini batches of the size mini_batch_size. The weights and biases of the network are updated
@@ -254,13 +255,16 @@ class SimpleNeuralNetwork:
         :param mini_batch_size: Number of training examples in a mini batch.
         :param number_of_epochs: How many times the network runs through the training examples.
         :param grad_step_size: The step size used in the gradient descent. In formulas it is often the greek letter eta.
+        :param shuffle_flag: If this value is true the training data is shuffled randomly. This flag was introduced for
+            testing purposes.
         :return: None.
         """
         number_of_training_examples = len(learning_data)
 
         for index in range(number_of_epochs):
 
-            rand.shuffle(learning_data)  # Randomly shuffle the training data
+            if shuffle_flag:
+                rand.shuffle(learning_data)  # Randomly shuffle the training data
 
             # Divide training data into mini batches.
             mini_batches = [learning_data[x:x + mini_batch_size] for x in range(0, number_of_training_examples,

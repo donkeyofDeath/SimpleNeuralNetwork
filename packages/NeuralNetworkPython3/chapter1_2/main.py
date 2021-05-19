@@ -16,6 +16,7 @@ weights = [np.random.randn(y, x) for x, y in zip(layer_sizes[:-1], layer_sizes[1
 biases = [np.random.randn(y, 1) for y in layer_sizes[1:]]
 
 net = nw.Network(layer_sizes, weights, biases)  # Declare the network.
+net2 = nw.Network(layer_sizes, weights, biases)  # Declare second network.
 
 mini_batches = [training_data[k:k + mini_batch_size] for k in range(0, len(training_data), mini_batch_size)]
 
@@ -27,4 +28,7 @@ delta_b, delta_w = net.backprop(x, y)
 
 # print(x, "\n", y)
 
-# net.learn(training_data, 30, 10, 3.0, test_data=verification_data)  # Let the network learn.
+net.learn(training_data, 3, 10, 3.0, test_data=verification_data)  # Let the network learn.
+net2.learn(training_data, 3, 10, 3.0, test_data=verification_data)
+
+print("The two networks have the same weights:", np.array_equal(net.weights[0], net2.weights[0]))
