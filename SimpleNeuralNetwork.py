@@ -245,7 +245,7 @@ class SimpleNeuralNetwork:
         return self.current_layer
 
     def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, grad_step_size: float,
-              shuffle_flag: bool=True):
+              shuffle_flag: bool = True):
         """
         This method is the heart of this class. It "teaches" the neural network using the training data which is
         separated into mini batches of the size mini_batch_size. The weights and biases of the network are updated
@@ -346,7 +346,8 @@ class SimpleNeuralNetwork:
         deltas = self.calculate_deltas(delta_vec_last_layer, z_values)
 
         # Partial derivative of the cost function with respect to the individual weights.
-        partial_weights = [np.dot(np.atleast_2d(delta_vec).T, np.atleast_2d(activation_vec)) for activation_vec, delta_vec in
+        partial_weights = [np.dot(np.atleast_2d(delta_vec).T, np.atleast_2d(activation_vec)) for
+                           activation_vec, delta_vec in
                            zip(activations[:-1], deltas)]
 
         # Returns the partial derivatives of the cost function. The partial derivative of the cost function with respect

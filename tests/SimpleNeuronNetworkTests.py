@@ -430,13 +430,9 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
         mini_batch_size = len(training_data)  # Number of elements in a mini batch.
 
-        # print(self.first_neural_network.weights)
-
         # Setup the neural networks.
         self.second_neural_network.update_weight_and_biases(training_data, mini_batch_size, self.learning_rate)
         self.second_reference_neural_network.update_mini_batch(reference_training_data, self.learning_rate)
-
-        # print(self.first_neural_network.weights)
 
         # Loop through all the weights and biases of the first neural network and compare them to the ones of the
         # reference network.
@@ -451,29 +447,69 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
     def test_learn(self):
         """
         Tests if the learning algorithm of the neural networks is implemented correctly by comparing the output of the
-        learn method with the result of the SGD method written by Michael Nielsen. This is done for two different neural
-        networks. I just realised that it is very difficult to test this method since it randomly shuffles the training
-        data.
+        learn method with the result of the learn method written by Michael Nielsen. This is done for two different
+        neural networks. I just realised that it is very difficult to test this method since it randomly shuffles the
+        training data.
 
         :return: None.
         """
-        # Training data for this test.
+
+        mini_batch_size = 2  # Number of elements in a mini batch.
+        epochs = 3  # Number of epochs.
+
+        # --------------------------------
+        # Testing the first neural network
+        # --------------------------------
+
+        # Training data for the first neural network.
         training_data = [(np.array([255., 255., 255., 255.]), np.array([1., 0., 0., 0.])),
                          (np.array([255., 0., 255., 255.]), np.array([0., 1., 0., 0.])),
                          (np.array([0., 255., 199., 255.]), np.array([0., 0., 1., 0.])),
                          (np.array([255., 255., 0., 255.]), np.array([0., 0., 0., 1.]))]
 
+        # Convert the arrays into the format Michael Nielsen uses.
         reference_training_data = [(convert_array(x), convert_array(y)) for x, y in training_data]
 
-        mini_batch_size = 2
-        epochs = 3
+        # Train a network and its reference using the corresponding training data.
+        self.first_neural_network.learn(training_data, mini_batch_size, epochs, self.learning_rate, shuffle_flag=False)
+        self.first_reference_neural_network.learn(reference_training_data, epochs, mini_batch_size, self.learning_rate,
+                                                  shuffle_flag=False)
 
-        self.first_neural_network.learn(training_data, mini_batch_size, epochs, self.learning_rate)
-        self.first_reference_neural_network.learn(reference_training_data, epochs, mini_batch_size, self.learning_rate)
-
+        # Compare all the weights to their reference.
         for weight_mat, weight_mat_ref in zip(self.first_neural_network.weights,
                                               self.first_reference_neural_network.weights):
             np.testing.assert_array_almost_equal(weight_mat, weight_mat_ref)
+
+        # Compare all the biases to their reference.
+        for bias_vec, bias_vec_ref in zip(self.first_neural_network.biases, self.first_reference_neural_network.biases):
+            np.testing.assert_array_almost_equal(convert_array(bias_vec), bias_vec_ref)
+
+        # ---------------------
+        # Second neural network
+        # ---------------------
+
+        # Training data for this neural network.
+        training_data = [(np.array([255., 255., 255., 255.]), np.array([1.])),
+                         (np.array([255., 0., 255., 255.]), np.array([0.66])),
+                         (np.array([0., 255., 199., 255.]), np.array([0.33])),
+                         (np.array([255., 255., 0., 255.]), np.array([0.]))]
+
+        # Convert the format of the training data to the format Michael Nielsen is using.
+        reference_training_data = [(convert_array(x), convert_array(y)) for x, y in training_data]
+
+        # Train the networks using the corresponding training data.
+        self.second_neural_network.learn(training_data, mini_batch_size, epochs, self.learning_rate, shuffle_flag=False)
+        self.second_reference_neural_network.learn(reference_training_data, epochs, mini_batch_size, self.learning_rate,
+                                                   shuffle_flag=False)
+
+        # Compare all the weights to their references.
+        for weight_mat, weight_mat_ref in zip(self.second_neural_network.weights,
+                                              self.second_reference_neural_network.weights):
+            np.testing.assert_array_almost_equal(weight_mat, weight_mat_ref)
+
+        # Compare all the biases to their references.
+        for bias_vec, bias_vec_ref in zip(self.second_neural_network.biases, self.second_reference_neural_network.biases):
+            np.testing.assert_array_almost_equal(convert_array(bias_vec), bias_vec_ref)
 
 
 if __name__ == "__main__":

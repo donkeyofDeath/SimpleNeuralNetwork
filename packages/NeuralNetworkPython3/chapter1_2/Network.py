@@ -18,20 +18,22 @@ class Network(object):
             a = sigmoid(np.dot(w, a) + b)
         return a
 
-    def learn(self, training_data, epochs, mini_batch_size, eta, test_data=None):
+    def learn(self, training_data, epochs, mini_batch_size, eta, shuffle_flag=True, test_data=None):
         """
         Train the neural network using mini-batch stochastic gradient descent.
         The "training_data" is a list of tuples "(x,y)" representing the training inputs
         and the desired output. The other non-optional parameters are self-explanatory.
         If "test_data" is provided then the network will be evaluated against the test
         data after each epoch, and partial progress printed out. This is useful for tracking
-        process, but slows things down substantially.
+        process, but slows things down substantially. The shuffle_flag variable was introduced by me for testing
+        purposes.
         """
         if test_data:
             n_test = len(test_data)
         n = len(training_data)
         for j in range(epochs):
-            random.shuffle(training_data)  # rearrange the training_data randomly
+            if shuffle_flag:
+                random.shuffle(training_data)  # rearrange the training_data randomly
             mini_batches = [training_data[k:k + mini_batch_size] for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
