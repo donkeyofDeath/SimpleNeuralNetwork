@@ -51,30 +51,38 @@ class MyTestCase(unittest.TestCase):
 
         :return: None
         """
+        # Test if the weights were declared correctly.
         for weight_mat, ref_weight_mat in zip(self.neural_network.weights, self.reference_neural_network.weights):
             np.testing.assert_array_almost_equal(weight_mat, ref_weight_mat)
 
+        # Test if the biases were declared correctly.
         for bias_vec, ref_bias_vec in zip(self.neural_network.biases, self.reference_neural_network.biases):
             np.testing.assert_array_almost_equal(snn.convert_array(bias_vec), ref_bias_vec)
 
     def test_backpropagation_algorithm(self) -> None:
         """
+        Test the backpropagation algorithm by comparing the result of my code to the result obtained by
+        Michael Nielsen's code. This is done by picking a random training input from the training data and the
+        corresponding result.
 
         :return: None.
         """
-        rand_num = np.random.randint(len(self.training_data))
-        data = self.training_data[rand_num][0]
-        results = self.training_data[rand_num][1]
-        reference_data = self.reference_training_data[rand_num][0]
-        reference_result = self.reference_training_data[rand_num][1]
+        rand_num = np.random.randint(len(self.training_data))  # Random integer.
+        data = self.training_data[rand_num][0]  # Randomly pick input data.
+        results = self.training_data[rand_num][1]  # Corresponding correct result to the input data.
+        reference_data = self.reference_training_data[rand_num][0]  # Pick the data in Michael Nielsen's format.
+        reference_result = self.reference_training_data[rand_num][1]  # Corresponding correct result.
 
+        # Test if the the randomly picked data has the same entries in my and Michael Nielsen's format.
         np.testing.assert_array_almost_equal(snn.convert_array(data), reference_data)
         np.testing.assert_array_almost_equal(snn.convert_array(results), reference_result)
 
+        # Results of the back propagation algorithm.
         partial_weights, partial_biases = self.neural_network.back_propagation_algorithm(data, results)
         ref_partial_biases, ref_partial_weights = self.reference_neural_network.backprop(reference_data,
                                                                                          reference_result)
 
+        # Test if the result are the same. Since the biases are 1-dimensional they are converted
         for part_weight_mat, ref_part_weight_mat in zip(partial_weights, ref_partial_weights):
             np.testing.assert_array_almost_equal(part_weight_mat, ref_part_weight_mat)
 
@@ -86,6 +94,7 @@ class MyTestCase(unittest.TestCase):
 
         :return: None.
         """
+
 
     def test_learn(self) -> None:
         """
