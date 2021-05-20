@@ -38,11 +38,11 @@ def load_data() -> Tuple[int, list, list]:
     # Reshape the training input so that each entry is a 1D vector.
     train_inputs = train_inputs.reshape(len(train_inputs), num_pixels)
     # Make the training data a list of tuples of numpy arrays.
-    training_data = list(zip(train_inputs, converted_desired_results))
+    training_data = list(zip(train_inputs / 255., converted_desired_results))
 
     # Reshape the test inputs so that the entries are 1D instead of 2D.
     test_inputs = test_inputs.reshape(len(test_inputs), num_pixels)
     # Create a list of tuples with the input and the corresponding result
-    verification_data = list(zip(test_inputs, test_results))
+    verification_data = list(zip(test_inputs / 255., test_results))
 
     return num_pixels, training_data, verification_data

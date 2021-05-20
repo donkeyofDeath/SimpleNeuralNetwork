@@ -445,17 +445,17 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         """
 
         mini_batch_size = 2  # Number of elements in a mini batch.
-        epochs = 3  # Number of epochs.
+        epochs = 100  # Number of epochs.
 
         # --------------------------------
         # Testing the first neural network
         # --------------------------------
 
         # Training data for the first neural network.
-        training_data = [(np.array([255., 255., 255., 255.]), np.array([1., 0., 0., 0.])),
-                         (np.array([255., 0., 255., 255.]), np.array([0., 1., 0., 0.])),
-                         (np.array([0., 255., 199., 255.]), np.array([0., 0., 1., 0.])),
-                         (np.array([255., 255., 0., 255.]), np.array([0., 0., 0., 1.]))]
+        training_data = [(np.array([1., 1., 1., 1.]), np.array([1., 0., 0., 0.])),
+                         (np.array([1., 0., -1., 1.]), np.array([0., 1., 0., 0.])),
+                         (np.array([0., 1., -1., 1.]), np.array([0., 0., 1., 0.])),
+                         (np.array([1., .5, 0., -1.]), np.array([0., 0., 0., 1.]))]
 
         # Convert the arrays into the format Michael Nielsen uses.
         reference_training_data = [(snn.convert_array(x), snn.convert_array(y)) for x, y in training_data]
@@ -479,10 +479,10 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         # ---------------------
 
         # Training data for this neural network.
-        training_data = [(np.array([255., 255., 255., 255.]), np.array([1.])),
-                         (np.array([255., 0., 255., 255.]), np.array([0.66])),
-                         (np.array([0., 255., 199., 255.]), np.array([0.33])),
-                         (np.array([255., 255., 0., 255.]), np.array([0.]))]
+        training_data = [(np.array([1., - 0.5, 1., - 0.3]), np.array([1.])),
+                         (np.array([1., 0., 1., - 0.5]), np.array([0.66])),
+                         (np.array([0., 1., 1., - 0.5]), np.array([0.33])),
+                         (np.array([- 0.5, 1., 0., - 1.]), np.array([0.]))]
 
         # Convert the format of the training data to the format Michael Nielsen is using.
         reference_training_data = [(snn.convert_array(x), snn.convert_array(y)) for x, y in training_data]

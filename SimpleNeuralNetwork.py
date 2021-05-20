@@ -356,9 +356,8 @@ class SimpleNeuralNetwork:
         deltas = self.calculate_deltas(delta_vec_last_layer, z_values)
 
         # Partial derivative of the cost function with respect to the individual weights.
-        partial_weights = [np.dot(np.atleast_2d(delta_vec).T, np.atleast_2d(activation_vec)) for
-                           activation_vec, delta_vec in
-                           zip(activations[:-1], deltas)]
+        partial_weights = [np.outer(delta_vec, activation_vec) for activation_vec, delta_vec in zip(activations[:-1],
+                                                                                                    deltas)]
 
         # Returns the partial derivatives of the cost function. The partial derivative of the cost function with respect
         # to the biases are the values of delta.
