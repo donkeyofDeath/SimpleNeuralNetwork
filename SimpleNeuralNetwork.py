@@ -1,6 +1,8 @@
 import numpy as np
 import random as rand
 
+from typing import List
+
 
 def convert_array(array: np.array) -> np.array:
     """
@@ -255,7 +257,7 @@ class SimpleNeuralNetwork:
         return self.current_layer
 
     def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, grad_step_size: float,
-              shuffle_flag: bool = True):
+              shuffle_flag: bool = True, verification_data: list = None):
         """
         This method is the heart of this class. It "teaches" the neural network using the training data which is
         separated into mini batches of the size mini_batch_size. The weights and biases of the network are updated
@@ -267,6 +269,7 @@ class SimpleNeuralNetwork:
         :param grad_step_size: The step size used in the gradient descent. In formulas it is often the greek letter eta.
         :param shuffle_flag: If this value is true the training data is shuffled randomly. This flag was introduced for
             testing purposes.
+        :param verification_data:
         :return: None.
         """
         number_of_training_examples = len(learning_data)
@@ -283,7 +286,13 @@ class SimpleNeuralNetwork:
                 # Updates the weights and biases after going through the training data of a mini batch.
                 self.update_weight_and_biases(mini_batch, mini_batch_size, grad_step_size)
 
-            print(f"Epoch {index} finished."),
+            if verification_data is not None:
+                # Count the correctly classified results.
+                counter = sum([result == np.argmax(self.feed_forward(data)) for data, result in verification_data])
+                # Print the result of how many images are identified correctly.
+                print(f"Epoch {index}: {counter} of {len(verification_data)} test images were verified correctly.")
+            else:
+                print(f"Epoch {index} finished.")
 
     def update_weight_and_biases(self, mini_batch: list, mini_batch_size: int, grad_step_size: float) -> None:
         """
@@ -329,14 +338,15 @@ class SimpleNeuralNetwork:
         # print(self.weights)
         # print(self.biases)
 
-    def back_propagation_algorithm(self, training_input: np.ndarray, desired_result: np.ndarray) -> (list, list):
+    def back_propagation_algorithm(self, training_input: np.ndarray, desired_result: np.ndarray) \
+            -> (List[np.ndarray], List[np.ndarray]):
         """
         Tested.
         The back propagation algorithm. Takes training data as an input an returns the partial derivatives of the
         weights and biases.
 
-        :param training_input: Training data represented by a numpy array of floats.
-        :param desired_result: Desired output associated with the training input laso represented by a numpy array of
+        :param training_input: Training data represented by a 1D numpy array of floats.
+        :param desired_result: Desired output associated with the training input also represented by a numpy array of
             floats.
         :return: A tuple of lists of numpy arrays. The individual arrays are the partial derivatives of the cost
             function with respect to the weights and biases in a layer.

@@ -32,13 +32,8 @@ neural_network = snn.SimpleNeuralNetwork(LAYER_SIZES, weights, biases)  # Define
 # Train the network and view results
 # ----------------------------------
 print("Started learning.")
-neural_network.learn(TRAINING_DATA, MINI_BATCH_SIZE, EPOCHS, LEARNING_RATE, shuffle_flag=False)  # Let the neural network learn.
+neural_network.learn(TRAINING_DATA, MINI_BATCH_SIZE, EPOCHS, LEARNING_RATE, shuffle_flag=False, verification_data=VERIFICATION_DATA)  # Let the neural network learn.
 print("Finished learning.")
-# Test the neural network by going through the test images and count the number of rightly classified images.
-result_counter = sum([result == np.argmax(neural_network.feed_forward(data)) for data, result in VERIFICATION_DATA])
-
-# Print the result of how many images are identified correctly.
-print(f"{result_counter} of {len(VERIFICATION_DATA)} test images were verified correctly by my network.")
 
 # -------------------------------------
 # Setup and train the reference network
