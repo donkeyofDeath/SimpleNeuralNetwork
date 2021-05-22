@@ -248,7 +248,7 @@ class SimpleNeuralNetwork:
         self.check_shapes()  # Check the shapes.
 
         # Reset the current layer regardless if update was called before.
-        self.current_layer = self.sigmoid_function(first_layer)
+        self.current_layer = first_layer
 
         # Return a list of numpy arrays corresponding to neurons in the according layer.
         for weight, bias in zip(self.weights, self.biases):
@@ -256,7 +256,7 @@ class SimpleNeuralNetwork:
 
         return self.current_layer
 
-    def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, grad_step_size: float,
+    def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, learning_rate: float,
               shuffle_flag: bool = True, verification_data: list = None):
         """
         This method is the heart of this class. It "teaches" the neural network using the training data which is
@@ -266,25 +266,27 @@ class SimpleNeuralNetwork:
         :param learning_data: Tuples of training data containing the input and the desired output.
         :param mini_batch_size: Number of training examples in a mini batch.
         :param number_of_epochs: How many times the network runs through the training examples.
-        :param grad_step_size: The step size used in the gradient descent. In formulas it is often the greek letter eta.
+        :param learning_rate: The step size used in the gradient descent. In formulas it is often the greek letter eta.
         :param shuffle_flag: If this value is true the training data is shuffled randomly. This flag was introduced for
             testing purposes.
-        :param verification_data:
+        :param verification_data: List of tuples containing numpy arrays. This data will be used to test the performance
+            od the neural network.
         :return: None.
         """
         number_of_training_examples = len(learning_data)
 
         for index in range(number_of_epochs):
 
+            # This line is mostly here for testing reasons.
             if shuffle_flag:
                 rand.shuffle(learning_data)  # Randomly shuffle the training data
 
-            # Divide training data into mini batches.
+            # Divide training data into mini batches of the same size.
             mini_batches = [learning_data[x:x + mini_batch_size] for x in range(0, number_of_training_examples,
                                                                                 mini_batch_size)]
             for mini_batch in mini_batches:
                 # Updates the weights and biases after going through the training data of a mini batch.
-                self.update_weight_and_biases(mini_batch, mini_batch_size, grad_step_size)
+                self.update_weight_and_biases(mini_batch, mini_batch_size, learning_rate)
 
             if verification_data is not None:
                 # Count the correctly classified results.
@@ -294,15 +296,15 @@ class SimpleNeuralNetwork:
             else:
                 print(f"Epoch {index} finished.")
 
-    def update_weight_and_biases(self, mini_batch: list, mini_batch_size: int, grad_step_size: float) -> None:
+    def update_weight_and_biases(self, mini_batch: list, mini_batch_size: int, learning_rate: float) -> None:
         """
         Tested.
         This method uses the data in a mini batch to update the weights and biases using the back propagation algorithm.
 
-        :param mini_batch_size: Number of data examples in a mini batch.
         :param mini_batch: List of tuples containing the data and the desired result of the network corresponding to
-            this data.
-        :param grad_step_size: Step size used in the gradient descent. In formulae it often represented by the greek
+            this data. The data is represented by numpy arrays.
+        :param mini_batch_size: Number of data examples in a mini batch.
+        :param learning_rate: Step size used in the gradient descent. In formulae it often represented by the greek
             letter eta.
         :return: None.
         """
@@ -328,7 +330,7 @@ class SimpleNeuralNetwork:
         # print(weight_derivatives_sum)
         # print(bias_derivatives_sum)
 
-        const = grad_step_size / mini_batch_size  # Constant used for calculating the mean gradient.
+        const = learning_rate / mini_batch_size  # Constant used for calculating the mean gradient.
 
         # Update the weights and biases of the network using back propagation.
         self.weights = [weight - const * delta_w for weight, delta_w in zip(self.weights, weight_derivatives_sum)]

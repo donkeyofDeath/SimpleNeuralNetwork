@@ -3,13 +3,16 @@ import numpy as np
 import SimpleNeuralNetwork as snn
 import packages.NeuralNetworkPython3.chapter1_2.Network as nn
 import loadMnistData as lmd
+import random as rn
 
 
 class MyTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         """
-
+        Set up-method for this test suite. It creates two neural networks one provided by Michael Nielsen and one by me.
+        Further, it sets up the training data of the MNIST library, once in the data format used by me and once in the
+        format used by Michael Nielsen.
 
         :return: None.
         """
@@ -21,7 +24,7 @@ class MyTestCase(unittest.TestCase):
 
         self.mini_batch_size = 100  # Size of the mini batches used in the stochastic gradient descent.
         self.learning_rate = 3.  # Learning rate often declared by an eta.
-        self.epochs = 3  # Number of epochs used in the stochastic gradient descent.
+        self.epochs = 2  # Number of epochs used in the stochastic gradient descent.
         num_output_neurons = 10  # Number of neurons in the output layer.
         num_hidden_layer_neurons = 30  # Number of neurons in a hidden layer.
         # Sizes of the layers in the neural network.
@@ -91,10 +94,31 @@ class MyTestCase(unittest.TestCase):
 
     def test_update_weights_and_biases(self) -> None:
         """
+        This test method picks 1000 random elements of the MNIST training data. This subset is then converted to the
+        data format used Michael Nielsen and then my and Nielsen's network are fed the according data via the update
+        methods. Then the resulting weights and biases are compared.
 
         :return: None.
         """
+        # subset_size = int(0.5 * np.random.randint(100, high=0.25 * len(self.training_data)))
+        learning_rate = 10. * np.random.ranf()  # Random float between 0. and 10.
+        mini_batch_size = 1000
 
+        # Pick a random subset of the MNIST data with 1000 elements.
+        random_mini_batch = rn.sample(self.training_data, mini_batch_size)
+        # Convert the random subset to the data format of Michael Nielsen.
+        reference_mini_batch = [(snn.convert_array(x), snn.convert_array(y)) for x, y in random_mini_batch]
+
+        # Update both networks once.
+        self.neural_network.update_weight_and_biases(random_mini_batch, mini_batch_size, learning_rate)
+        self.reference_neural_network.update_mini_batch(reference_mini_batch, learning_rate)
+
+        # Test if the resulting weights and biases are the same.
+        for weight_mat, ref_weight_mat in zip(self.neural_network.weights, self.reference_neural_network.weights):
+            np.testing.assert_array_almost_equal(weight_mat, ref_weight_mat)
+
+        for bias_vec, ref_bias_vec in zip(self.neural_network.biases, self.reference_neural_network.biases):
+            np.testing.assert_array_almost_equal(snn.convert_array(bias_vec), ref_bias_vec)
 
     def test_learn(self) -> None:
         """
