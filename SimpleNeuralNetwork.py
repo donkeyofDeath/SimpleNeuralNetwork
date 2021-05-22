@@ -327,18 +327,11 @@ class SimpleNeuralNetwork:
             bias_derivatives_sum = [delta_b_sum + delta_b for delta_b_sum, delta_b in zip(bias_derivatives_sum,
                                                                                           bias_derivatives)]
 
-        # print(weight_derivatives_sum)
-        # print(bias_derivatives_sum)
-
         const = learning_rate / mini_batch_size  # Constant used for calculating the mean gradient.
 
         # Update the weights and biases of the network using back propagation.
         self.weights = [weight - const * delta_w for weight, delta_w in zip(self.weights, weight_derivatives_sum)]
         self.biases = [bias - const * delta_b for bias, delta_b in zip(self.biases, bias_derivatives_sum)]
-
-        # For debugging.
-        # print(self.weights)
-        # print(self.biases)
 
     def back_propagation_algorithm(self, training_input: np.ndarray, desired_result: np.ndarray) \
             -> (List[np.ndarray], List[np.ndarray]):
@@ -426,11 +419,6 @@ class SimpleNeuralNetwork:
                                               weight_mat, bias_vec in zip(self.weights, self.biases)]
 
         # Calculate z values using the activations. The last element is dropped since this is the output layer.
-        # z_values = [np.dot(weight_mat, activation) + bias_vec if index
-        #            else self.sigmoid_function(np.dot(weight_mat, activation) + bias_vec)
-        #            for index, (weight_mat, bias_vec, activation) in enumerate(zip(self.weights, self.biases,
-        #                                                                           activations[:-1]))]
-
         z_values = [np.dot(weight_mat, activation) + bias_vec for weight_mat, bias_vec, activation in
                     zip(self.weights, self.biases, activations[:-1])]
 
