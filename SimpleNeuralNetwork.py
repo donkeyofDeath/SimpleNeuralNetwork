@@ -321,7 +321,7 @@ class SimpleNeuralNetwork:
 
         const = learning_rate / mini_batch_size  # Constant used for calculating the mean gradient.
 
-        # Update the weights and biases of the network using back propagation.
+        # Update the weights and biases of the network.
         self.weights = [weight - const * delta_w for weight, delta_w in zip(self.weights, weight_derivatives_sum)]
         self.biases = [bias - const * delta_b for bias, delta_b in zip(self.biases, bias_derivatives_sum)]
 
@@ -340,7 +340,6 @@ class SimpleNeuralNetwork:
         """
         activations, z_values = self.calculate_a_and_z(training_input)  # Activations and z values.
 
-        # print(activations)
         # Gradient of the cost function with respect to the activations of the last layer.
         cost_func_grad = self.cost_func_grad(activations[-1], desired_result)
 
@@ -353,8 +352,8 @@ class SimpleNeuralNetwork:
         deltas = self.calculate_deltas(delta_vec_last_layer, z_values)
 
         # Partial derivative of the cost function with respect to the individual weights.
-        partial_weights = [np.outer(delta_vec, activation_vec) for activation_vec, delta_vec in zip(activations[:-1],
-                                                                                                    deltas)]
+        partial_weights = [np.outer(delta_vec, activation_vec) for activation_vec, delta_vec in
+                           zip(activations[:-1], deltas)]
 
         # Returns the partial derivatives of the cost function. The partial derivative of the cost function with respect
         # to the biases are the values of delta.
