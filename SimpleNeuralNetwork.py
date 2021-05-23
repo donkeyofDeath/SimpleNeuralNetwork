@@ -284,7 +284,7 @@ class SimpleNeuralNetwork:
                 # Count the correctly classified results.
                 counter = sum([result == np.argmax(self.feed_forward(data)) for data, result in verification_data])
                 # Print the result of how many images are identified correctly.
-                print(f"Epoch {index}: {counter} of {len(verification_data)} test images were verified correctly.")
+                print(f"Epoch {index}: {counter} out of {len(verification_data)}.")
             else:
                 print(f"Epoch {index} finished.")
 
