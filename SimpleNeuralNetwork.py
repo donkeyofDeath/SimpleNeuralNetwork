@@ -69,16 +69,7 @@ class SimpleNeuralNetwork:
         if not all(new_layer_sizes > 0):
             raise ValueError("The sizes of the layers have to be positive.")
 
-        # Check: The layer size of the current layer corresponds to one in the new list of layer sizes.
-        # if len(self.current_layer) != new_layer_sizes[self._layer_counter]:
-        #    raise ValueError("The size of the current layer has to coincide with the corresponding value in the"
-        #                     "layer_sizes array.")
-
         self._layer_sizes = new_layer_sizes
-
-        # Print a warning in colored text to the console when the layer size is changed.
-        # print("\033[93m" + "Warning: Size of the layers was changed. The shape of the weights and biases might not"
-        #                   "coincide with the layer sizes anymore." + "\033[0m")
 
     @property
     def biases(self) -> list:
@@ -259,6 +250,7 @@ class SimpleNeuralNetwork:
     def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, learning_rate: float,
               shuffle_flag: bool = True, verification_data: list = None):
         """
+        Tested.
         This method is the heart of this class. It "teaches" the neural network using the training data which is
         separated into mini batches of the size mini_batch_size. The weights and biases of the network are updated
         after each mini batch using gradient descent and back propagation.

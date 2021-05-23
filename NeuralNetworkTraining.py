@@ -12,8 +12,8 @@ import time as tm
 NUM_PIXELS, TRAINING_DATA, VERIFICATION_DATA = lmd.load_data()  # Load the MNIST data.
 
 MINI_BATCH_SIZE = 10  # Size of the mini batches used in the stochastic gradient descent.
-LEARNING_RATE = 3.  # Learning rate often declared by an eta.
-EPOCHS = 2  # Number of epochs used in the stochastic gradient descent.
+LEARNING_RATE = 3.  # Learning rate often declared as an eta.
+EPOCHS = 10  # Number of epochs used in the stochastic gradient descent.
 NUM_OUTPUT_NEURONS = 10  # Number of neurons in the output layer.
 NUM_HIDDEN_LAYER_NEURONS = 30  # Number of neurons in a hidden layer.
 # Sizes of the layers in the neural network.
@@ -32,12 +32,12 @@ neural_network = snn.SimpleNeuralNetwork(LAYER_SIZES, weights, biases)  # Define
 # ----------------------------------
 # Train the network and view results
 # ----------------------------------
-print("Started learning.")
+
 start = tm.time()
-neural_network.learn(TRAINING_DATA, MINI_BATCH_SIZE, EPOCHS, LEARNING_RATE, shuffle_flag=False,
+neural_network.learn(TRAINING_DATA, MINI_BATCH_SIZE, EPOCHS, LEARNING_RATE, shuffle_flag=True,
                      verification_data=VERIFICATION_DATA)  # Let the neural network learn.
 end = tm.time()
-print(f"Finished learning. My network needed: {end - start} s.")
+print(f"Finished learning. My network needed: {end - start:.2f} s.")
 
 # -------------------------------------
 # Setup and train the reference network
@@ -54,6 +54,6 @@ VERIFICATION_DATA = [(snn.convert_array(x), y) for x, y in VERIFICATION_DATA]
 # Train the network.
 start = tm.time()
 reference_neural_network.learn(TRAINING_DATA, EPOCHS, MINI_BATCH_SIZE, LEARNING_RATE, test_data=VERIFICATION_DATA,
-                               shuffle_flag=False)
+                               shuffle_flag=True)
 end = tm.time()
-print(f"Michael Nielsen's network needed: {end - start} s.")
+print(f"Michael Nielsen's network needed: {end - start:.2f} s.")
