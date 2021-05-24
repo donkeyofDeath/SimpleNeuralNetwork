@@ -288,8 +288,8 @@ class SimpleNeuralNetwork:
             else:
                 print(f"Epoch {index} finished.")
 
-    def learn_2(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, learning_rate: float,
-                shuffle_flag: bool = True, verification_data: list = None):
+    def learn_2(self, learning_data: list, mini_batch_size: int, number_of_epochs: int,
+                learning_rate: float, shuffle_flag: bool = True, verification_data: list = None):
         """
 
         :param learning_data:
@@ -301,6 +301,9 @@ class SimpleNeuralNetwork:
         :return: None
         """
         number_of_training_examples = len(learning_data)
+        # number_of_pixels = len(learning_data[0][0])
+        # number_of_results = len(learning_data[0][1])
+        number_of_mini_batches = int(number_of_training_examples / mini_batch_size)
 
         for index in range(number_of_epochs):
 
@@ -309,12 +312,17 @@ class SimpleNeuralNetwork:
                 # Randomly shuffle the training data.
                 rand.shuffle(learning_data)
 
+            input_data, desired_results = zip(*learning_data)
+
             # Divide training data into mini batches of the same size.
-            mini_batches = [learning_data[x:x + mini_batch_size] for x in range(0, number_of_training_examples,
-                                                                                mini_batch_size)]
-            for mini_batch in mini_batches:
+            input_data = np.array(input_data).reshape(number_of_mini_batches, mini_batch_size, self.layer_sizes[0])
+            desired_results = np.array(desired_results).reshape(number_of_mini_batches, mini_batch_size,
+                                                                self.layer_sizes[-1])
+
+            for input_data_mat, desired_result_mat in zip(input_data, desired_results):
                 # Updates the weights and biases after going through the training data of a mini batch.
-                self.update_weight_and_biases(mini_batch, mini_batch_size, learning_rate)
+                self.update_weights_and_biases_2((input_data_mat.T, desired_result_mat.T), mini_batch_size,
+                                                 learning_rate)
 
             if verification_data is not None:
                 # Count the correctly classified results.
@@ -324,7 +332,8 @@ class SimpleNeuralNetwork:
             else:
                 print(f"Epoch {index} finished.")
 
-    def update_weights_and_biases_2(self, mini_batch: tuple, mini_batch_size: int, learning_rate: float) -> None:
+    def update_weights_and_biases_2(self, mini_batch: Tuple[np.ndarray, np.ndarray], mini_batch_size: int,
+                                    learning_rate: float) -> None:
         """
         Updates the weights and biases of the network using gradient descent and the back propagation algorithm.
         The algorithm is implemented to operate mostly on matrix multiplications using numpy as well as possible.
@@ -350,13 +359,17 @@ class SimpleNeuralNetwork:
                               self.sigmoid_derivative(z_values[-1]))]
 
         # Calculate the delta values.
-        for weight_mat, z_value_mat in zip(reversed(self.weights), reversed(activations)):
+        for weight_mat, z_value_mat in zip(reversed(self.weights), reversed(activations[:-1])):
             deltas.insert(0, np.multiply(np.dot(weight_mat.T, deltas[0]), self.sigmoid_derivative(z_value_mat)))
 
         const = learning_rate / mini_batch_size  # Constant used to calculate the mean gradient.
 
+        print(len(deltas))
+        print(len(activations))
+        print(len(self.weights))
+
         # Update the weights and the biases.
-        self.weights = [weight_mat - const * np.dot(delta_mat.T, activations) for delta_mat, activation_mat, weight_mat
+        self.weights = [weight_mat - const * np.dot(delta_mat.T, activation_mat) for delta_mat, activation_mat, weight_mat
                         in zip(deltas, activations, self.weights)]
         self.biases = [bias_vec - const * delta_mat.sum(axis=1) for delta_mat, bias_vec in zip(deltas, self.biases)]
 

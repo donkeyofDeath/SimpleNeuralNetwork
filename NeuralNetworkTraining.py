@@ -4,7 +4,6 @@ import packages.NeuralNetworkPython3.chapter1_2.Network as nn
 import loadMnistData as lmd
 import time as tm
 
-
 # -------------------
 # Declaring constants
 # -------------------
@@ -34,8 +33,8 @@ neural_network = snn.SimpleNeuralNetwork(LAYER_SIZES, weights, biases)  # Define
 # ----------------------------------
 
 start = tm.time()
-neural_network.learn(TRAINING_DATA, MINI_BATCH_SIZE, EPOCHS, LEARNING_RATE, shuffle_flag=True,
-                     verification_data=VERIFICATION_DATA)  # Let the neural network learn.
+neural_network.learn_2(TRAINING_DATA, MINI_BATCH_SIZE, EPOCHS, LEARNING_RATE, shuffle_flag=True,
+                       verification_data=VERIFICATION_DATA)  # Let the neural network learn.
 end = tm.time()
 print(f"Finished learning. My network needed: {end - start:.2f} s.")
 
