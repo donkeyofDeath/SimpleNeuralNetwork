@@ -1,7 +1,7 @@
 import numpy as np
 import random as rand
 
-from typing import List
+from typing import List, Tuple
 
 
 def convert_array(array: np.array) -> np.array:
@@ -287,6 +287,78 @@ class SimpleNeuralNetwork:
                 print(f"Epoch {index}: {counter} out of {len(verification_data)}.")
             else:
                 print(f"Epoch {index} finished.")
+
+    def learn_2(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, learning_rate: float,
+                shuffle_flag: bool = True, verification_data: list = None):
+        """
+
+        :param learning_data:
+        :param mini_batch_size:
+        :param number_of_epochs:
+        :param learning_rate:
+        :param shuffle_flag:
+        :param verification_data:
+        :return: None
+        """
+        number_of_training_examples = len(learning_data)
+
+        for index in range(number_of_epochs):
+
+            # This line is mostly here for testing reasons.
+            if shuffle_flag:
+                # Randomly shuffle the training data.
+                rand.shuffle(learning_data)
+
+            # Divide training data into mini batches of the same size.
+            mini_batches = [learning_data[x:x + mini_batch_size] for x in range(0, number_of_training_examples,
+                                                                                mini_batch_size)]
+            for mini_batch in mini_batches:
+                # Updates the weights and biases after going through the training data of a mini batch.
+                self.update_weight_and_biases(mini_batch, mini_batch_size, learning_rate)
+
+            if verification_data is not None:
+                # Count the correctly classified results.
+                counter = sum([result == np.argmax(self.feed_forward(data)) for data, result in verification_data])
+                # Print the result of how many images are identified correctly.
+                print(f"Epoch {index}: {counter} out of {len(verification_data)}.")
+            else:
+                print(f"Epoch {index} finished.")
+
+    def update_weights_and_biases_2(self, mini_batch: tuple, mini_batch_size: int, learning_rate: float) -> None:
+        """
+        Updates the weights and biases of the network using gradient descent and the back propagation algorithm.
+        The algorithm is implemented to operate mostly on matrix multiplications using numpy as well as possible.
+
+        :param mini_batch: This is a tuple of 2D numpy arrays. The arrays are matrices containing the input data and the
+            corresponding desired results of the mini batch. Each column in such a matrix classifies an input/result.
+        :param mini_batch_size: Number of elements in a mini_batch.
+        :param learning_rate: The learning rate used to train the network using gradient descent. In formulae it is
+            often declared as an eta.
+        :return: None.
+        """
+        activations = [mini_batch[0]]  # List containing the activations of all inputs for each layer.
+        z_values = []  # List containing the z values of all inputs for each layer.
+
+        # Calculate the activations and the z values.
+        for weight_mat, bias_vec in zip(self.weights, self.biases):
+            z_value_mat = np.dot(weight_mat, activations[-1]) + bias_vec[:, np.newaxis]
+            z_values.append(z_value_mat)
+            activations.append(self.sigmoid_function(z_value_mat))
+
+        # The deltas of the last layer.
+        deltas = [np.multiply(self.cost_func_grad(activations[-1], mini_batch[1]),
+                              self.sigmoid_derivative(z_values[-1]))]
+
+        # Calculate the delta values.
+        for weight_mat, z_value_mat in zip(reversed(self.weights), reversed(activations)):
+            deltas.insert(0, np.multiply(np.dot(weight_mat.T, deltas[0]), self.sigmoid_derivative(z_value_mat)))
+
+        const = learning_rate / mini_batch_size  # Constant used to calculate the mean gradient.
+
+        # Update the weights and the biases.
+        self.weights = [weight_mat - const * np.dot(delta_mat.T, activations) for delta_mat, activation_mat, weight_mat
+                        in zip(deltas, activations, self.weights)]
+        self.biases = [bias_vec - const * delta_mat.sum(axis=1) for delta_mat, bias_vec in zip(deltas, self.biases)]
 
     def update_weight_and_biases(self, mini_batch: list, mini_batch_size: int, learning_rate: float) -> None:
         """
