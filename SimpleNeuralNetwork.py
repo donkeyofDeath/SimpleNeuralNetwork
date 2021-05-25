@@ -268,12 +268,13 @@ class SimpleNeuralNetwork:
         """
         number_of_training_examples = len(learning_data)
 
-        # Test if the
+        # Test if the mini batch size divides the number of training examples if not an error is raised.
         if number_of_training_examples % mini_batch_size == 0:
             number_of_mini_batches = int(number_of_training_examples / mini_batch_size)
         else:
             raise ValueError("The mini batch size has to divide the number of training examples.")
 
+        # Iterate through all epochs.
         for index in range(number_of_epochs):
             # This line is mostly here for testing reasons.
             if shuffle_flag:
@@ -285,8 +286,8 @@ class SimpleNeuralNetwork:
 
             # Divide training data into mini batches of the same size.
             input_data = np.array(input_data).reshape(number_of_mini_batches, mini_batch_size, self.layer_sizes[0])
-            desired_results = np.array(desired_results).reshape(number_of_mini_batches,
-                                                                mini_batch_size, self.layer_sizes[-1])
+            desired_results = np.array(desired_results).reshape(number_of_mini_batches, mini_batch_size,
+                                                                self.layer_sizes[-1])
 
             # Updates the weights and biases after going through the training data of a mini batch.
             for input_data_mat, desired_result_mat in zip(input_data, desired_results):
@@ -317,6 +318,10 @@ class SimpleNeuralNetwork:
         activations = [mini_batch[0]]  # List containing the activations of all inputs for each layer.
         z_values = []  # List containing the z values of all inputs for each layer.
 
+        # --------------------------
+        # Back propagation algorithm
+        # --------------------------
+
         # Calculate the activations and the z values.
         for weight_mat, bias_vec in zip(self.weights, self.biases):
             z_value_mat = np.dot(weight_mat, activations[-1]) + bias_vec[:, np.newaxis]
@@ -331,10 +336,13 @@ class SimpleNeuralNetwork:
         for weight_mat, z_value_mat in zip(reversed(self.weights[1:]), reversed(z_values[:-1])):
             deltas.insert(0, np.multiply(np.dot(weight_mat.T, deltas[0]), self.sigmoid_derivative(z_value_mat)))
 
+        # -------------------------
+        # Update weights and biases
+        # -------------------------
+
         const = learning_rate / mini_batch_size  # Constant used to calculate the mean gradient.
 
         # Update the weights and the biases.
         self.weights = [weight_mat - const * np.dot(delta_mat, activation_mat.T) for
-                        delta_mat, activation_mat, weight_mat
-                        in zip(deltas, activations[:-1], self.weights)]
+                        delta_mat, activation_mat, weight_mat in zip(deltas, activations[:-1], self.weights)]
         self.biases = [bias_vec - const * delta_mat.sum(axis=1) for delta_mat, bias_vec in zip(deltas, self.biases)]
