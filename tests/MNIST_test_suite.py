@@ -6,7 +6,7 @@ import loadMnistData as lmd
 import random as rn
 
 
-class MyTestCase(unittest.TestCase):
+class MnistTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         """
@@ -62,36 +62,6 @@ class MyTestCase(unittest.TestCase):
         for bias_vec, ref_bias_vec in zip(self.neural_network.biases, self.reference_neural_network.biases):
             np.testing.assert_array_almost_equal(snn.convert_array(bias_vec), ref_bias_vec)
 
-    def test_backpropagation_algorithm(self) -> None:
-        """
-        Test the backpropagation algorithm by comparing the result of my code to the result obtained by
-        Michael Nielsen's code. This is done by picking a random training input from the training data and the
-        corresponding result.
-
-        :return: None.
-        """
-        rand_num = np.random.randint(len(self.training_data))  # Random integer.
-        data = self.training_data[rand_num][0]  # Randomly pick input data.
-        results = self.training_data[rand_num][1]  # Corresponding correct result to the input data.
-        reference_data = self.reference_training_data[rand_num][0]  # Pick the data in Michael Nielsen's format.
-        reference_result = self.reference_training_data[rand_num][1]  # Corresponding correct result.
-
-        # Test if the the randomly picked data has the same entries in my and Michael Nielsen's format.
-        np.testing.assert_array_almost_equal(snn.convert_array(data), reference_data)
-        np.testing.assert_array_almost_equal(snn.convert_array(results), reference_result)
-
-        # Results of the back propagation algorithm.
-        partial_weights, partial_biases = self.neural_network.back_propagation_algorithm(data, results)
-        ref_partial_biases, ref_partial_weights = self.reference_neural_network.backprop(reference_data,
-                                                                                         reference_result)
-
-        # Test if the result are the same. Since the biases are 1-dimensional they are converted
-        for part_weight_mat, ref_part_weight_mat in zip(partial_weights, ref_partial_weights):
-            np.testing.assert_array_almost_equal(part_weight_mat, ref_part_weight_mat)
-
-        for part_bias_vec, ref_part_bias_vec in zip(partial_biases, ref_partial_biases):
-            np.testing.assert_array_almost_equal(snn.convert_array(part_bias_vec), ref_part_bias_vec)
-
     def test_update_weights_and_biases(self) -> None:
         """
         This test method picks 1000 random elements of the MNIST training data. This subset is then converted to the
@@ -112,7 +82,8 @@ class MyTestCase(unittest.TestCase):
         reference_mini_batch = [(snn.convert_array(x), snn.convert_array(y)) for x, y in random_mini_batch]
 
         # Update both networks once.
-        self.neural_network.update_weights_and_biases_2((input_data.T, desired_results.T), mini_batch_size, learning_rate)
+        self.neural_network.update_weights_and_biases((np.array(input_data).T, np.array(desired_results).T),
+                                                      mini_batch_size, learning_rate)
         self.reference_neural_network.update_mini_batch(reference_mini_batch, learning_rate)
 
         # Test if the resulting weights and biases are the same.
