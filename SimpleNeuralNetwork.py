@@ -288,41 +288,51 @@ class SimpleNeuralNetwork:
             else:
                 print(f"Epoch {index} finished.")
 
-    def learn_2(self, learning_data: list, mini_batch_size: int, number_of_epochs: int,
-                learning_rate: float, shuffle_flag: bool = True, verification_data: list = None):
+    def learn_2(self, learning_data: Tuple[np.ndarray, np.ndarray], mini_batch_size: int, number_of_epochs: int,
+                learning_rate: float, shuffle_flag: bool = True, verification_data: list = None) -> None:
         """
+        This method is the heart of this class. It "teaches" the neural network using the training data which is
+        separated into mini batches of the size mini_batch_size. The weights and biases of the network are updated
+        after each mini batch using gradient descent which itself is using the back propagation algorithm.
 
-        :param learning_data:
-        :param mini_batch_size:
-        :param number_of_epochs:
-        :param learning_rate:
-        :param shuffle_flag:
-        :param verification_data:
+        :param learning_data: Data containing tuples of numpy arrays. The first numpy array contains the input data for
+            the neural network. The second numpy array contains the desired output of the network corresponding to the
+            the input.
+        :param mini_batch_size: Number of inputs in a mini batch.
+        :param number_of_epochs: Number of epochs that are executed.
+        :param learning_rate: Learning rate used in the gradient descent. This number is often declared as the greek
+            letter eta in formulae.
+        :param shuffle_flag: If this flag is true the input data is shuffled. If the value of the flag is False, the
+            learning data is processed as is.
+        :param verification_data: This data has the same format as the learning_data. If data is provided, it is used to
+            see how many images are verified correctly.
         :return: None
         """
         number_of_training_examples = len(learning_data)
-        # number_of_pixels = len(learning_data[0][0])
-        # number_of_results = len(learning_data[0][1])
-        number_of_mini_batches = int(number_of_training_examples / mini_batch_size)
+
+        # Test if the
+        if number_of_training_examples % mini_batch_size == 0:
+            number_of_mini_batches = int(number_of_training_examples / mini_batch_size)
+        else:
+            raise ValueError("The mini batch size has to divide the number of training examples.")
 
         for index in range(number_of_epochs):
-
             # This line is mostly here for testing reasons.
             if shuffle_flag:
                 # Randomly shuffle the training data.
                 rand.shuffle(learning_data)
 
+            # Recombine the shuffled data.
             input_data, desired_results = zip(*learning_data)
 
             # Divide training data into mini batches of the same size.
             input_data = np.array(input_data).reshape(number_of_mini_batches, mini_batch_size, self.layer_sizes[0])
-            desired_results = np.array(desired_results).reshape(number_of_mini_batches, mini_batch_size,
-                                                                self.layer_sizes[-1])
+            desired_results = np.array(desired_results).reshape(number_of_mini_batches,
+                                                                mini_batch_size, self.layer_sizes[-1])
 
+            # Updates the weights and biases after going through the training data of a mini batch.
             for input_data_mat, desired_result_mat in zip(input_data, desired_results):
-                # Updates the weights and biases after going through the training data of a mini batch.
-                self.update_weights_and_biases_2((input_data_mat.T, desired_result_mat.T), mini_batch_size,
-                                                 learning_rate)
+                self.update_weights_and_biases_2((input_data_mat.T, desired_result_mat.T), mini_batch_size, learning_rate)
 
             if verification_data is not None:
                 # Count the correctly classified results.
@@ -332,14 +342,13 @@ class SimpleNeuralNetwork:
             else:
                 print(f"Epoch {index} finished.")
 
-    def update_weights_and_biases_2(self, mini_batch: Tuple[np.ndarray, np.ndarray], mini_batch_size: int,
-                                    learning_rate: float) -> None:
+    def update_weights_and_biases_2(self, mini_batch: list, mini_batch_size: int, learning_rate: float) -> None:
         """
         Updates the weights and biases of the network using gradient descent and the back propagation algorithm.
         The algorithm is implemented to operate mostly on matrix multiplications using numpy as well as possible.
 
-        :param mini_batch: This is a tuple of 2D numpy arrays. The arrays are matrices containing the input data and the
-            corresponding desired results of the mini batch. Each column in such a matrix classifies an input/result.
+        :param mini_batch: List of tuples containing the data and the desired result of the network corresponding to
+            this data. The data is represented by numpy arrays.
         :param mini_batch_size: Number of elements in a mini_batch.
         :param learning_rate: The learning rate used to train the network using gradient descent. In formulae it is
             often declared as an eta.
@@ -358,19 +367,18 @@ class SimpleNeuralNetwork:
         deltas = [np.multiply(self.cost_func_grad(activations[-1], mini_batch[1]),
                               self.sigmoid_derivative(z_values[-1]))]
 
+        # print(len(z_values))
+
         # Calculate the delta values.
-        for weight_mat, z_value_mat in zip(reversed(self.weights), reversed(activations[:-1])):
+        for weight_mat, z_value_mat in zip(reversed(self.weights[1:]), reversed(z_values[:-1])):
             deltas.insert(0, np.multiply(np.dot(weight_mat.T, deltas[0]), self.sigmoid_derivative(z_value_mat)))
 
         const = learning_rate / mini_batch_size  # Constant used to calculate the mean gradient.
 
-        print(len(deltas))
-        print(len(activations))
-        print(len(self.weights))
-
         # Update the weights and the biases.
-        self.weights = [weight_mat - const * np.dot(delta_mat.T, activation_mat) for delta_mat, activation_mat, weight_mat
-                        in zip(deltas, activations, self.weights)]
+        self.weights = [weight_mat - const * np.dot(delta_mat, activation_mat.T) for
+                        delta_mat, activation_mat, weight_mat
+                        in zip(deltas, activations[:-1], self.weights)]
         self.biases = [bias_vec - const * delta_mat.sum(axis=1) for delta_mat, bias_vec in zip(deltas, self.biases)]
 
     def update_weight_and_biases(self, mini_batch: list, mini_batch_size: int, learning_rate: float) -> None:

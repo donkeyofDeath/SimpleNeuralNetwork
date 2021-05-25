@@ -106,11 +106,13 @@ class MyTestCase(unittest.TestCase):
 
         # Pick a random subset of the MNIST data with 1000 elements.
         random_mini_batch = rn.sample(self.training_data, mini_batch_size)
+        # Recombine the shuffled data.
+        input_data, desired_results = zip(*random_mini_batch)
         # Convert the random subset to the data format of Michael Nielsen.
         reference_mini_batch = [(snn.convert_array(x), snn.convert_array(y)) for x, y in random_mini_batch]
 
         # Update both networks once.
-        self.neural_network.update_weight_and_biases(random_mini_batch, mini_batch_size, learning_rate)
+        self.neural_network.update_weights_and_biases_2((input_data.T, desired_results.T), mini_batch_size, learning_rate)
         self.reference_neural_network.update_mini_batch(reference_mini_batch, learning_rate)
 
         # Test if the resulting weights and biases are the same.
