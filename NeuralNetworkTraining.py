@@ -10,7 +10,7 @@ import time as tm
 
 NUM_PIXELS, TRAINING_DATA, VERIFICATION_DATA = lmd.load_data()  # Load the MNIST data.
 
-MINI_BATCH_SIZE = 10  # Size of the mini batches used in the stochastic gradient descent.
+MINI_BATCH_SIZE = 100  # Size of the mini batches used in the stochastic gradient descent.
 LEARNING_RATE = 3.  # Learning rate often declared as an eta.
 EPOCHS = 10  # Number of epochs used in the stochastic gradient descent.
 NUM_OUTPUT_NEURONS = 10  # Number of neurons in the output layer.
@@ -33,8 +33,8 @@ neural_network = snn.SimpleNeuralNetwork(LAYER_SIZES, weights, biases)  # Define
 # ----------------------------------
 
 start = tm.time()
-neural_network.learn_2(TRAINING_DATA, MINI_BATCH_SIZE, EPOCHS, LEARNING_RATE, shuffle_flag=True,
-                       verification_data=VERIFICATION_DATA)  # Let the neural network learn.
+neural_network.learn(TRAINING_DATA, MINI_BATCH_SIZE, EPOCHS, LEARNING_RATE, shuffle_flag=True,
+                     verification_data=VERIFICATION_DATA)  # Let the neural network learn.
 end = tm.time()
 print(f"Finished learning. My network needed: {end - start:.2f} s.")
 

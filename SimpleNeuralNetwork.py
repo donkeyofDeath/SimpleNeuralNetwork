@@ -249,6 +249,7 @@ class SimpleNeuralNetwork:
     def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, learning_rate: float,
               shuffle_flag: bool = True, verification_data: list = None) -> None:
         """
+        Tested.
         This method is the heart of this class. It "teaches" the neural network using the training data which is
         separated into mini batches of the size mini_batch_size. The weights and biases of the network are updated
         after each mini batch using gradient descent which itself is using the back propagation algorithm.
@@ -291,9 +292,12 @@ class SimpleNeuralNetwork:
 
             # Updates the weights and biases after going through the training data of a mini batch.
             for input_data_mat, desired_result_mat in zip(input_data, desired_results):
+                # The data needs to be transposed since to have the right format for the matrix multiplications,
                 self.update_weights_and_biases((input_data_mat.T, desired_result_mat.T), mini_batch_size,
                                                learning_rate)
 
+            # Use verification data if it provided.
+            # TODO: I could probably make this much more efficient using matrix multiplication.
             if verification_data is not None:
                 # Count the correctly classified results.
                 counter = sum([result == np.argmax(self.feed_forward(data)) for data, result in verification_data])
@@ -305,6 +309,7 @@ class SimpleNeuralNetwork:
     def update_weights_and_biases(self, mini_batch: Tuple[np.ndarray, np.ndarray], mini_batch_size: int,
                                   learning_rate: float) -> None:
         """
+        Tested.
         Updates the weights and biases of the network using gradient descent and the back propagation algorithm.
         The algorithm is implemented to operate mostly on matrix multiplications using numpy as well as possible.
 
@@ -329,8 +334,7 @@ class SimpleNeuralNetwork:
             activations.append(self.sigmoid_function(z_value_mat))
 
         # The delta values of the last layer.
-        deltas = [np.multiply(self.cost_func_grad(activations[-1], mini_batch[1]),
-                              self.sigmoid_derivative(z_values[-1]))]
+        deltas = [np.multiply(self.cost_func_grad(activations[-1], mini_batch[1]), self.sigmoid_derivative(z_values[-1]))]
 
         # Calculate the delta values.
         for weight_mat, z_value_mat in zip(reversed(self.weights[1:]), reversed(z_values[:-1])):
