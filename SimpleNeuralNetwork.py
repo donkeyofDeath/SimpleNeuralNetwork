@@ -10,7 +10,7 @@ def convert_array(array: np.array) -> np.array:
     :param array: 1D numpy array
     :return: 2D numpy column array with the same entry.
     """
-    return np.reshape(array, (len(array), 1))
+    return array.reshape((len(array), 1))
 
 
 class SimpleNeuralNetwork:
@@ -300,7 +300,7 @@ class SimpleNeuralNetwork:
             # TODO: I could probably make this much more efficient using matrix multiplication.
             if verification_data is not None:
                 # Count the correctly classified results.
-                counter = sum([result == np.argmax(self.feed_forward(data)) for data, result in verification_data])
+                counter = sum([result == np.nanargmax(self.feed_forward(data)) for data, result in verification_data])
                 # Print the result of how many images are identified correctly.
                 print(f"Epoch {index}: {counter} out of {len(verification_data)}.")
             else:
