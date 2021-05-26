@@ -1,6 +1,6 @@
 import numpy as np
 import SimpleNeuralNetwork as snn
-import packages.NeuralNetworkPython3.chapter1_2.Network as nn
+# import packages.NeuralNetworkPython3.chapter1_2.Network as nn
 import loadMnistData as lmd
 import time as tm
 
@@ -12,7 +12,7 @@ NUM_PIXELS, TRAINING_DATA, VERIFICATION_DATA = lmd.load_data()  # Load the MNIST
 
 MINI_BATCH_SIZE = 100  # Size of the mini batches used in the stochastic gradient descent.
 LEARNING_RATE = 3.  # Learning rate often declared as an eta.
-EPOCHS = 50  # Number of epochs used in the stochastic gradient descent.
+EPOCHS = 10  # Number of epochs used in the stochastic gradient descent.
 NUM_OUTPUT_NEURONS = 10  # Number of neurons in the output layer.
 NUM_HIDDEN_LAYER_NEURONS = 30  # Number of neurons in a hidden layer.
 # Sizes of the layers in the neural network.

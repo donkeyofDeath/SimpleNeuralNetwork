@@ -302,9 +302,9 @@ class SimpleNeuralNetwork:
                 # Count the correctly classified results.
                 counter = sum([result == np.argmax(self.feed_forward(data)) for data, result in verification_data])
                 # Print the result of how many images are identified correctly.
-                print(f"Epoch {index}: {counter} out of {len(verification_data)}.")
+                print(f"Epoch {index + 1}: {counter} out of {len(verification_data)}.")
             else:
-                print(f"Epoch {index} finished.")
+                print(f"Epoch {index + 1} finished.")
 
     def update_weights_and_biases(self, mini_batch: Tuple[np.ndarray, np.ndarray], mini_batch_size: int,
                                   learning_rate: float) -> None:
