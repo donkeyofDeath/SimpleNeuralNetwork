@@ -38,7 +38,8 @@ class MnistTestCase(unittest.TestCase):
         weights = [np.random.randn(y, x) for x, y in zip(layer_sizes[:-1], layer_sizes[1:])]
         biases = [np.random.randn(y) for y in layer_sizes[1:]]
 
-        self.neural_network = snn.SimpleNeuralNetwork(layer_sizes, weights, biases)  # Define the neural network.
+        # Define the neural network.
+        self.neural_network = snn.SimpleNeuralNetwork(layer_sizes, weights=weights, biases=biases)
         # Declare network using the library written by michael Nielsen.
         biases = [snn.convert_array(bias_vec) for bias_vec in biases]  # Convert the basis to the right format.
         self.reference_neural_network = nn.Network(layer_sizes, weights, biases)

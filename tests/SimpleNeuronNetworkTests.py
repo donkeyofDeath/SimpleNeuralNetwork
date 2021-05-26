@@ -38,9 +38,9 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
                                                           self.reference_second_biases)
 
         # Set up the networks with parameters from above.
-        self.first_neural_network = snn.SimpleNeuralNetwork(self.layer_sizes, self.weights, self.biases)
-        self.second_neural_network = snn.SimpleNeuralNetwork(self.second_layer_sizes, self.second_weights,
-                                                             self.second_biases)
+        self.first_neural_network = snn.SimpleNeuralNetwork(self.layer_sizes, weights=self.weights, biases=self.biases)
+        self.second_neural_network = snn.SimpleNeuralNetwork(self.second_layer_sizes, weights=self.second_weights,
+                                                             biases=self.second_biases)
 
     def tearDown(self) -> None:
         """
@@ -164,27 +164,6 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
 
         with self.assertRaises(ValueError):
             self.second_neural_network.check_shapes()
-
-    def test_update(self) -> None:
-        """
-        This method tests the update method of both neural networks.
-
-        :return: None
-        """
-        # Set the current layer to the sigmoid function of the first layer attribute.
-        self.first_neural_network.current_layer = self.first_neural_network.sigmoid_function(self.first_layer)
-        np.testing.assert_array_almost_equal(self.first_neural_network.update(self.first_neural_network.weights[0],
-                                                                              self.first_neural_network.biases[0]),
-                                             np.array([0.8495477739862124,
-                                                       0.8495477739862124,
-                                                       0.8495477739862124,
-                                                       0.8495477739862124]))
-
-        # Set the current layer to the sigmoid function of the first layer attribute.
-        self.second_neural_network.current_layer = self.second_neural_network.sigmoid_function(self.first_layer)
-        self.second_neural_network.update(self.second_neural_network.weights[0], self.second_neural_network.biases[0])
-        np.testing.assert_array_almost_equal(self.second_neural_network.current_layer, np.array([0.9214430516601156,
-                                                                                                 0.9214430516601156]))
 
     def test_feed_forward(self) -> None:
         """
