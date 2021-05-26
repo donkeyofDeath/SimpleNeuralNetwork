@@ -231,23 +231,21 @@ class SimpleNeuralNetwork:
     def feed_forward(self, first_layer: np.ndarray) -> np.ndarray:
         """
         Tested.
-        Runs the update() method repeatedly. How often the method is run is determined by the length of the layer_sizes
-        attribute.
+        Feeds a collection of inputs through the network. The input is represented by a 2D numpy array in which a
+        column represents a single input.
 
-        :return: A list containing a one-dimensional numpy array containing the values of the corresponding layer.
+        :return: A 2D numpy array containing all the outputs of the network. A single output is represented by a column.
         """
-        self.check_shapes()  # Check the shapes.
-
         self.current_layer = first_layer  # Reset the current layer regardless if update was called before.
 
         # Return a list of numpy arrays corresponding to neurons in the according layer.
         for weight, bias in zip(self.weights, self.biases):
-            self.current_layer = self.sigmoid_function(np.dot(weight, self.current_layer) + bias)
+            self.current_layer = self.sigmoid_function(np.dot(weight, self.current_layer) + bias[:, np.newaxis])
 
         return self.current_layer
 
     def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, learning_rate: float,
-              shuffle_flag: bool = True, verification_data: list = None) -> None:
+              shuffle_flag: bool = True, verification_data: Tuple[np.ndarray, np.ndarray] = None) -> None:
         """
         Tested.
         This method is the heart of this class. It "teaches" the neural network using the training data which is
@@ -267,6 +265,7 @@ class SimpleNeuralNetwork:
             see how many images are verified correctly.
         :return: None
         """
+        self.check_shapes()  # Check the shapes.
         number_of_training_examples = len(learning_data)
 
         # Test if the mini batch size divides the number of training examples if not an error is raised.
@@ -300,9 +299,10 @@ class SimpleNeuralNetwork:
             # TODO: I could probably make this much more efficient using matrix multiplication.
             if verification_data is not None:
                 # Count the correctly classified results.
-                counter = sum([result == np.argmax(self.feed_forward(data)) for data, result in verification_data])
+                counter = np.sum(verification_data[1] == np.apply_along_axis(np.argmax, 0,
+                                                                             self.feed_forward(verification_data[0])))
                 # Print the result of how many images are identified correctly.
-                print(f"Epoch {index + 1}: {counter} out of {len(verification_data)}.")
+                print(f"Epoch {index + 1}: {counter} out of {len(verification_data[1])}.")
             else:
                 print(f"Epoch {index + 1} finished.")
 

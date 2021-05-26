@@ -74,10 +74,10 @@ def load_data_2() -> Tuple[int, List[Tuple[np.ndarray, np.ndarray]], np.ndarray,
     training_data = list(zip(train_inputs / 255., converted_desired_results))
 
     # Reshape the test inputs so that the entries are 1D instead of 2D.
-    test_inputs = test_inputs.reshape(len(test_inputs), num_pixels)
-    print(test_inputs.T.shape)
+    test_inputs = test_inputs.reshape(len(test_inputs), num_pixels) / 255.
+    # print(test_inputs.T.shape)
 
-    return num_pixels, training_data, test_inputs, test_results
+    return num_pixels, training_data, test_inputs.T, test_results
 
 
 if __name__ == "__main__":
