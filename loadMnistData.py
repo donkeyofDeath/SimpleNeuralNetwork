@@ -1,6 +1,6 @@
 from keras.datasets import mnist
 import numpy as np
-from typing import Tuple
+from typing import Tuple, List
 
 
 def convert_number(number: int) -> np.ndarray:
@@ -48,15 +48,15 @@ def load_data() -> Tuple[int, list, list]:
     return num_pixels, training_data, verification_data
 
 
-def load_data_2():
+def load_data_2() -> Tuple[int, List[Tuple[np.ndarray, np.ndarray]], np.ndarray, np.ndarray]:
     """
     Loads the training data and verification data of the MNIST library. The images of the MNIST libraries are
     represented by 1D numpy arrays with 8 Bit values representing the gray scale of the pixels in the images.
 
 
     :return: Returns the number of pixels in the images, a list of tuples of numpy arrays containing the training inputs
-        and the corresponding correct output and a list of tuples of lists containing the verification input
-        (numpy array) and an int representing the number described by the corresponding numpy array.
+        and the corresponding correct output and a two numpy arrays containing the verification data and corresponding
+        result.
     """
     num_pixels = 784  # Number  of pixels in a image.
 
@@ -69,13 +69,15 @@ def load_data_2():
     # Convert the elements of the desired results from numbers to numpy arrays.
     converted_desired_results = np.array([convert_number(num) for num in desired_results])
     # Reshape the training input so that each entry is a 1D vector.
-    train_inputs = train_inputs.reshape(len(train_inputs), num_pixels) / 255.
+    train_inputs = train_inputs.reshape(len(train_inputs), num_pixels)
+    # Make the training data a list of tuples of numpy arrays.
+    training_data = list(zip(train_inputs / 255., converted_desired_results))
 
     # Reshape the test inputs so that the entries are 1D instead of 2D.
-    test_inputs = test_inputs.reshape(len(test_inputs), num_pixels) / 255.
+    test_inputs = test_inputs.reshape(len(test_inputs), num_pixels)
 
-    return num_pixels, train_inputs, converted_desired_results, test_inputs, test_results
+    return num_pixels, training_data, test_inputs, test_results
 
 
 if __name__ == "__main__":
-    load_data()
+    load_data_2()
