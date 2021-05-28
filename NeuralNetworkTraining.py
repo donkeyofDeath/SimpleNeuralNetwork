@@ -13,7 +13,7 @@ VERIFICATION_DATA = (VERIFICATION_INPUT, VERIFICATION_RESULT)
 
 MINI_BATCH_SIZE = 100  # Size of the mini batches used in the stochastic gradient descent.
 LEARNING_RATE = 3.  # Learning rate often declared as an eta.
-EPOCHS = 50  # Number of epochs used in the stochastic gradient descent.
+EPOCHS = 100  # Number of epochs used in the stochastic gradient descent.
 NUM_OUTPUT_NEURONS = 10  # Number of neurons in the output layer.
 NUM_HIDDEN_LAYER_NEURONS = 30  # Number of neurons in a hidden layer.
 # Sizes of the layers in the neural network.
