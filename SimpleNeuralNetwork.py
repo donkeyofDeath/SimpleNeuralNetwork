@@ -262,12 +262,14 @@ class SimpleNeuralNetwork:
         return self.current_layer
 
     def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, learning_rate: float,
-              shuffle_flag: bool = True, verification_data: Tuple[np.ndarray, np.ndarray] = None) -> None:
+              reg_param: float, shuffle_flag: bool = True, verification_data: Tuple[np.ndarray, np.ndarray] = None) \
+            -> None:
         """
         Tested.
         This method is the heart of this class. It "teaches" the neural network using the training data which is
         separated into mini batches of the size mini_batch_size. The weights and biases of the network are updated
-        after each mini batch using gradient descent which itself is using the back propagation algorithm.
+        after each mini batch using gradient descent which itself is using the back propagation algorithm. A cross
+        entropy cost function is used for the learning procedure as well L2 regularization.
 
         :param learning_data: Data containing tuples of numpy arrays. The first numpy array contains the input data for
             the neural network. The second numpy array contains the desired output of the network corresponding to the
@@ -276,6 +278,7 @@ class SimpleNeuralNetwork:
         :param number_of_epochs: Number of epochs that are executed.
         :param learning_rate: Learning rate used in the gradient descent. This number is often declared as the greek
             letter eta in formulae.
+        :param reg_param: Parameter associated with the L2 regularization in formula it is often presented by a lambda.
         :param shuffle_flag: If this flag is true the input data is shuffled. If the value of the flag is False, the
             learning data is processed as is.
         :param verification_data: This data has the same format as the learning_data. If data is provided, it is used to
@@ -295,7 +298,7 @@ class SimpleNeuralNetwork:
         for index in range(number_of_epochs):
             # This line is mostly here for testing reasons.
             if shuffle_flag:
-                # Randomly shuffle the training data.
+                # Randomly shuffle the training data and the according results.
                 rand.shuffle(learning_data)
 
             # Recombine the shuffled data.
@@ -310,9 +313,9 @@ class SimpleNeuralNetwork:
             for input_data_mat, desired_result_mat in zip(input_data, desired_results):
                 # The data needs to be transposed since to have the right format for the matrix multiplications,
                 self.update_weights_and_biases((input_data_mat.T, desired_result_mat.T), mini_batch_size,
-                                               learning_rate)
+                                               learning_rate, reg_param, number_of_training_examples)
 
-            # Use verification data if it provided.
+            # Use verification data if it is provided.
             if verification_data is not None:
                 # Count the correctly classified results.
                 counter = np.sum(verification_data[1] == np.apply_along_axis(np.argmax, 0,
@@ -323,17 +326,20 @@ class SimpleNeuralNetwork:
                 print(f"Epoch {index + 1} finished.")
 
     def update_weights_and_biases(self, mini_batch: Tuple[np.ndarray, np.ndarray], mini_batch_size: int,
-                                  learning_rate: float) -> None:
+                                  learning_rate: float, reg_param: float, data_size: int) -> None:
         """
         Tested.
         Updates the weights and biases of the network using gradient descent and the back propagation algorithm.
         The algorithm is implemented to operate mostly on matrix multiplications using numpy as well as possible.
-
+        A cross entropy cost function is used for the learning procedure as well L2 regularization.
+  
         :param mini_batch: List of tuples containing the data and the desired result of the network corresponding to
             this data. The data is represented by numpy arrays.
         :param mini_batch_size: Number of elements in a mini_batch.
         :param learning_rate: The learning rate used to train the network using gradient descent. In formulae it is
             often declared as an eta.
+        :param reg_param: The variable lambda used in the L2 regularization formula.
+        :param data_size: Number of elements in the training data.
         :return: None.
         """
         activations = [mini_batch[0]]  # List containing the activations of all inputs for each layer.
@@ -364,6 +370,8 @@ class SimpleNeuralNetwork:
         const = learning_rate / mini_batch_size  # Constant used to calculate the mean gradient.
 
         # Update the weights and the biases using the mean gradient.
-        self.weights = [weight_mat - const * np.dot(delta_mat, activation_mat.T) for
-                        delta_mat, activation_mat, weight_mat in zip(deltas, activations[:-1], self.weights)]
+        # The first term in formula of the weights is due to the L2 regularization.
+        self.weights = [(1 - (learning_rate * reg_param / data_size)) * weight_mat - const *
+                        np.dot(delta_mat, activation_mat.T) for delta_mat, activation_mat, weight_mat in
+                        zip(deltas, activations[:-1], self.weights)]
         self.biases = [bias_vec - const * delta_mat.sum(axis=1) for delta_mat, bias_vec in zip(deltas, self.biases)]
