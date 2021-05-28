@@ -15,14 +15,23 @@ def convert_array(array: np.array) -> np.array:
 
 class SimpleNeuralNetwork:
 
+    # TODO: Add monitoring.
+    # TODO: Add cross entropy function.
+    # TODO: Add new weight initialization.
+    # TODO: Add regularization.
+
     def __init__(self, layer_sizes: np.ndarray, weights: List[np.ndarray] = None, biases: List[np.ndarray] = None) \
             -> None:
         """
         Tested.
         This is the constructor for a simple feed forward neural network object. The neural network consist of
-        individual layers of different which are connected through the weights and biases via linear equation.
-        The result of this linear equation is then put in a Sigmoid function to amp it to the interval [0, 1].
+        individual layers of different size which are connected through the weights and biases via linear equations.
+        The result of this calculation is then put in a Sigmoid function to amp it to the interval [0, 1].
         For further reading checkout the book http://neuralnetworksanddeeplearning.com/ by Michael Nielsen.
+        If no weights and biases are provided the network is initialized with random weights and biases obeying a
+        Gaussian distribution. The distribution of the biases have a mean value of 0 and a variance of 1, while the
+        distribution of the weights also has the mean 0 but the variance is given by 1/N where N is the number of input
+        neurons of a layer.
 
         :param layer_sizes: A 1D numpy array, containing the size (number of neurons) of the individual layers.
         :param weights: List of weight matrices (2D numpy arrays) connecting the layers of the network via
@@ -35,7 +44,8 @@ class SimpleNeuralNetwork:
 
         # Set weights randomly if no weights are provided.
         if weights is None:
-            self.weights = [np.random.randn(y, x) for x, y in zip(self.layer_sizes[:-1], self.layer_sizes[1:])]
+            self.weights = [np.random.randn(y, x)/np.sqrt(x) for x, y in zip(self.layer_sizes[:-1],
+                                                                             self.layer_sizes[1:])]
         else:
             self.weights = weights
 
@@ -296,7 +306,6 @@ class SimpleNeuralNetwork:
                                                learning_rate)
 
             # Use verification data if it provided.
-            # TODO: I could probably make this much more efficient using matrix multiplication.
             if verification_data is not None:
                 # Count the correctly classified results.
                 counter = np.sum(verification_data[1] == np.apply_along_axis(np.argmax, 0,

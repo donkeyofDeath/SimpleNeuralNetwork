@@ -172,17 +172,17 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         :return: None.
         """
         # Check if the run method resets the parameters set by the update method correctly.
-        first_result = self.first_neural_network.feed_forward(self.first_layer)
+        first_result = self.first_neural_network.feed_forward(self.first_layer.reshape(len(self.first_layer), 1))
 
-        np.testing.assert_array_almost_equal(first_result, np.array([0.8677026536525567,
-                                                                     0.8677026536525567,
-                                                                     0.8677026536525567,
-                                                                     0.8677026536525567]))
+        np.testing.assert_array_almost_equal(first_result, np.array([[0.8677026536525567],
+                                                                     [0.8677026536525567],
+                                                                     [0.8677026536525567],
+                                                                     [0.8677026536525567]]))
 
         # Check if the run method resets the parameters set by the update method correctly.
-        second_result = self.second_neural_network.feed_forward(self.first_layer)
+        second_result = self.second_neural_network.feed_forward(self.first_layer.reshape(len(self.first_layer), 1))
 
-        np.testing.assert_array_almost_equal(second_result, np.array([0.9481003474891515]))
+        np.testing.assert_array_almost_equal(second_result, np.array([[0.9481003474891515]]))
 
     def test_sigmoid_function(self) -> None:
         """
