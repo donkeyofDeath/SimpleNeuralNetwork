@@ -17,7 +17,6 @@ class SimpleNeuralNetwork:
 
     # TODO: Add monitoring.
     # TODO: Add cross entropy function.
-    # TODO: Add new weight initialization.
     # TODO: Add regularization.
 
     def __init__(self, layer_sizes: np.ndarray, weights: List[np.ndarray] = None, biases: List[np.ndarray] = None) \
@@ -192,17 +191,26 @@ class SimpleNeuralNetwork:
         return 1. / (1. + np.exp(-num))
 
     @staticmethod
-    def cost_func_grad(last_layer_activation, desired_result):
+    def calc_delta(activation_vec: np.ndarray, result_vec: np.ndarray) -> np.ndarray:
         """
-        Tested.
-        One component of the gradient of a quadratic cost function with respect to the activation in the last layer of
-        the neural network.
+        This method calculates the value of delta for a cross entropy cost function.
 
-        :param last_layer_activation: The activation of the neurons in the last layer of the neural network.
-        :param desired_result: The desired activations of the neurons in the last layer of the neural network.
-        :return: last_layer_activation - desired_result.
+        :param activation_vec: Numpy array containing the activations of each layer.
+        :param result_vec: The desired results corresponding to each input.
+        :return: The associated value of the parameter delta.
         """
-        return last_layer_activation - desired_result
+        return activation_vec - result_vec
+
+    @staticmethod
+    def cross_entropy_cost(act_vec: np.ndarray, res_vec: np.ndarray) -> float:
+        """
+        Formula for a cross entropy cost function. The nan_to_num function is used so a number is returned.
+
+        :param act_vec: Numpy array containing the activations for each layer.
+        :param res_vec: Numpy array containing the desired results for each input.
+        :return: The associated cross entropy cost function.
+        """
+        return np.sum(np.nan_to_num(-res_vec * np.log(act_vec) - (1 - res_vec) * np.log(1 - act_vec)))
 
     # --------------
     # Normal Methods
@@ -342,8 +350,9 @@ class SimpleNeuralNetwork:
             z_values.append(z_value_mat)
             activations.append(self.sigmoid_function(z_value_mat))
 
-        # The delta values of the last layer.
-        deltas = [np.multiply(self.cost_func_grad(activations[-1], mini_batch[1]), self.sigmoid_derivative(z_values[-1]))]
+        # Initialize the list of deltas with the delta values of the last layer.
+        # deltas = [np.multiply(self.cost_func_grad(activations[-1], mini_batch[1]), self.sigmoid_derivative(z_values[-1]))]
+        deltas = [self.calc_delta(activations[-1], mini_batch[1])]
 
         # Calculate the delta values.
         for weight_mat, z_value_mat in zip(reversed(self.weights[1:]), reversed(z_values[:-1])):
@@ -355,7 +364,7 @@ class SimpleNeuralNetwork:
 
         const = learning_rate / mini_batch_size  # Constant used to calculate the mean gradient.
 
-        # Update the weights and the biases.
+        # Update the weights and the biases using the mean gradient.
         self.weights = [weight_mat - const * np.dot(delta_mat, activation_mat.T) for
                         delta_mat, activation_mat, weight_mat in zip(deltas, activations[:-1], self.weights)]
         self.biases = [bias_vec - const * delta_mat.sum(axis=1) for delta_mat, bias_vec in zip(deltas, self.biases)]

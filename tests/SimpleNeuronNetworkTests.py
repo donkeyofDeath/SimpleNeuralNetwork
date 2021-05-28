@@ -223,15 +223,6 @@ class SimpleNeuralNetworkTestCase(ut.TestCase):
         np.testing.assert_almost_equal(finite_difference_1, self.first_neural_network.sigmoid_derivative(point_1))
         np.testing.assert_almost_equal(finite_difference_2, self.first_neural_network.sigmoid_derivative(point_2))
 
-    def test_cost_func_grad(self):
-        """
-        Test the gradient of the cost function.
-
-        :return: None.
-        """
-        self.assertAlmostEqual(1 - 2, self.first_neural_network.cost_func_grad(1, 2))
-        self.assertAlmostEqual(3 - 2, self.first_neural_network.cost_func_grad(3, 2))
-
 
 if __name__ == "__main__":
     ut.main()
