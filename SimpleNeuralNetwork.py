@@ -16,7 +16,6 @@ def convert_array(array: np.array) -> np.array:
 class SimpleNeuralNetwork:
 
     # TODO: Add monitoring.
-    # TODO: Add cross entropy function.
     # TODO: Add regularization.
 
     def __init__(self, layer_sizes: np.ndarray, weights: List[np.ndarray] = None, biases: List[np.ndarray] = None) \
