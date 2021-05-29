@@ -267,10 +267,13 @@ class SimpleNeuralNetwork:
     def calc_accuracy(self, input_data: np.ndarray, desired_results: np.ndarray) -> int:
         """
         TODO: Test this method.
+        This method takes in a 2D numpy array of inputs in this array each column represents on data input. The desired
+        results is 1D numpy array of integers between 0 and 9. These numbers represent the correct output of the
+        network. The method calculates how many inputs have the correct output and returns the number.
 
-        :param input_data:
-        :param desired_results:
-        :return:
+        :param input_data: 2D numpy array in which each column represents the input data.
+        :param desired_results: Represents the correct output for each input.
+        :return: The number correctly verified inputs.
         """
         return np.sum(desired_results == np.apply_along_axis(np.argmax, 0, self.feed_forward(input_data)))
 
@@ -285,7 +288,8 @@ class SimpleNeuralNetwork:
         This method is the heart of this class. It "teaches" the neural network using the training data which is
         separated into mini batches of the size mini_batch_size. The weights and biases of the network are updated
         after each mini batch using gradient descent which itself is using the back propagation algorithm. A cross
-        entropy cost function is used for the learning procedure as well L2 regularization.
+        entropy cost function is used for the learning procedure as well L2 regularization. The method returns the data
+        which is set by the flags to be returned. If no flags are the set method returns four empty lists.
 
         :param learning_data: Data containing tuples of numpy arrays. The first numpy array contains the input data for
             the neural network. The second numpy array contains the desired output of the network corresponding to the
@@ -299,7 +303,13 @@ class SimpleNeuralNetwork:
             learning data is processed as is.
         :param verification_data: This data has the same format as the learning_data. If data is provided, it is used to
             see how many images are verified correctly.
-        :return: Returns the
+        :param monitor_verification_accuracy_flag: Monitoring flag of the accuracy on the verification data for each epoch.
+        :param monitor_verification_cost_flag: Monitoring flag of the cost function of the verification for each epoch
+        :param monitor_training_accuracy_flag: Monitoring flag of the accuracy on the training data for each epoch.
+        :param monitor_training_cost_flag: Monitoring flag of the cost function of the training data for each epoch.
+        :return: Returns four numpy arrays containing the data according to the set flags. Flags which were not set
+            return empty lists. The data is taken after a training epoch is completed. The data arrays are returned in
+            the order: verification accuracy, verification cost, training accuracy, training cost.
         """
         self.check_shapes()  # Check the shapes.
         number_of_training_examples = len(learning_data)
@@ -335,30 +345,34 @@ class SimpleNeuralNetwork:
                 self.update_weights_and_biases((input_data_mat.T, desired_result_mat.T), mini_batch_size,
                                                learning_rate, reg_param, number_of_training_examples)
 
-            # Decalre the input and output data.
+            # Declare the input and output data.
             input_data = input_data.reshape(number_of_training_examples, self.layer_sizes[0]).T
             desired_results = desired_results.reshape(number_of_training_examples, self.layer_sizes[-1]).T
             if monitor_training_accuracy_flag:
-                training_accuracy.append(self.calc_accuracy(input_data, desired_results))
+                # Ratio of correctly verified training examples.
+                train_ratio = self.calc_accuracy(input_data, np.apply_along_axis(np.argmax, 0, desired_results))\
+                             / number_of_training_examples
+                training_accuracy.append(train_ratio)
             if monitor_training_cost_flag:
                 training_cost.append(self.cross_entropy_cost(self.feed_forward(input_data), desired_results))
 
             # Use verification data if it is provided.
             if verification_data is not None:
+                verification_size = len(verification_data[1])
                 # Count the correctly classified results.
-                verification_counter = self.calc_accuracy(verification_data[0], verification_data[1])
+                verification_ratio = self.calc_accuracy(verification_data[0], verification_data[1])/verification_size
                 if monitor_verification_accuracy_flag:
-                    verification_accuracy.append(verification_counter)
+                    verification_accuracy.append(verification_ratio)
                 if monitor_verification_cost_flag:
-                    res = np.apply_along_axis(lmd.convert_number, 1, verification_data[1].reshape(verification_data[1].shape[0], 1))
+                    res = np.apply_along_axis(lmd.convert_number, 1, np.atleast_2d(verification_data[1]).T)
                     verification_cost.append(self.cross_entropy_cost(self.feed_forward(verification_data[0]), res.T))
 
                 # Print the result of how many images are identified correctly.
-                print(f"Epoch {index + 1}: {verification_counter} out of {len(verification_data[1])}.")
+                print(f"Epoch {index + 1}: {100 * verification_ratio:.2f} %.")
             else:
                 print(f"Epoch {index + 1} finished.")
 
-        return np.array(training_cost), np.array(training_accuracy), np.array(verification_cost), np.array(verification_accuracy)
+        return np.array(verification_accuracy), np.array(verification_cost), np.array(training_accuracy), np.array(training_cost)
 
     def update_weights_and_biases(self, mini_batch: Tuple[np.ndarray, np.ndarray], mini_batch_size: int,
                                   learning_rate: float, reg_param: float, data_size: int) -> None:
