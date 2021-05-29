@@ -335,10 +335,9 @@ class SimpleNeuralNetwork:
                 self.update_weights_and_biases((input_data_mat.T, desired_result_mat.T), mini_batch_size,
                                                learning_rate, reg_param, number_of_training_examples)
 
-            # If the according flags are provided redefine the input data and desired results.
-            if monitor_training_accuracy_flag or monitor_training_cost_flag:
-                input_data = input_data.reshape(number_of_training_examples, self.layer_sizes[0]).T
-                desired_results = desired_results.reshape(number_of_training_examples, self.layer_sizes[-1]).T
+            # Decalre the input and output data.
+            input_data = input_data.reshape(number_of_training_examples, self.layer_sizes[0]).T
+            desired_results = desired_results.reshape(number_of_training_examples, self.layer_sizes[-1]).T
             if monitor_training_accuracy_flag:
                 training_accuracy.append(self.calc_accuracy(input_data, desired_results))
             if monitor_training_cost_flag:
