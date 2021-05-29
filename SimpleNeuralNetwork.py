@@ -1,6 +1,7 @@
 import numpy as np
 import random as rand
 from typing import Tuple, List
+import loadMnistData as lmd
 
 
 def convert_array(array: np.array) -> np.array:
@@ -16,7 +17,6 @@ def convert_array(array: np.array) -> np.array:
 class SimpleNeuralNetwork:
 
     # TODO: Add monitoring.
-    # TODO: Add regularization.
 
     def __init__(self, layer_sizes: np.ndarray, weights: List[np.ndarray] = None, biases: List[np.ndarray] = None) \
             -> None:
@@ -42,8 +42,8 @@ class SimpleNeuralNetwork:
 
         # Set weights randomly if no weights are provided.
         if weights is None:
-            self.weights = [np.random.randn(y, x)/np.sqrt(x) for x, y in zip(self.layer_sizes[:-1],
-                                                                             self.layer_sizes[1:])]
+            self.weights = [np.random.randn(y, x) / np.sqrt(x) for x, y in zip(self.layer_sizes[:-1],
+                                                                               self.layer_sizes[1:])]
         else:
             self.weights = weights
 
@@ -192,6 +192,7 @@ class SimpleNeuralNetwork:
     @staticmethod
     def calc_delta(activation_vec: np.ndarray, result_vec: np.ndarray) -> np.ndarray:
         """
+        TODO: Test this method.
         This method calculates the value of delta for a cross entropy cost function.
 
         :param activation_vec: Numpy array containing the activations of each layer.
@@ -201,15 +202,17 @@ class SimpleNeuralNetwork:
         return activation_vec - result_vec
 
     @staticmethod
-    def cross_entropy_cost(act_vec: np.ndarray, res_vec: np.ndarray) -> float:
+    def cross_entropy_cost(act_mat: np.ndarray, res_mat: np.ndarray) -> float:
         """
+        TODO: Test this method.
         Formula for a cross entropy cost function. The nan_to_num function is used so a number is returned.
 
-        :param act_vec: Numpy array containing the activations for each layer.
-        :param res_vec: Numpy array containing the desired results for each input.
+        :param act_mat: 2D Numpy array containing the activations of the last layer of the neural network.
+        :param res_mat: 2D Numpy array containing the desired results for each input.
         :return: The associated cross entropy cost function.
         """
-        return np.sum(np.nan_to_num(-res_vec * np.log(act_vec) - (1 - res_vec) * np.log(1 - act_vec)))
+        return np.sum(np.nan_to_num(-res_mat * np.log(act_mat) - (1 - res_mat) * np.log(1 - act_mat)).sum(axis=0)) / \
+               act_mat.shape[1]
 
     # --------------
     # Normal Methods
@@ -261,10 +264,23 @@ class SimpleNeuralNetwork:
 
         return self.current_layer
 
-    def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, learning_rate: float,
-              reg_param: float, shuffle_flag: bool = True, verification_data: Tuple[np.ndarray, np.ndarray] = None) \
-            -> None:
+    def calc_accuracy(self, input_data: np.ndarray, desired_results: np.ndarray) -> int:
         """
+        TODO: Test this method.
+
+        :param input_data:
+        :param desired_results:
+        :return:
+        """
+        return np.sum(desired_results == np.apply_along_axis(np.argmax, 0, self.feed_forward(input_data)))
+
+    def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, learning_rate: float,
+              reg_param: float, shuffle_flag: bool = True, verification_data: Tuple[np.ndarray, np.ndarray] = None,
+              monitor_training_cost_flag=False, monitor_training_accuracy_flag=False,
+              monitor_verification_cost_flag=False, monitor_verification_accuracy_flag=False) \
+            -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """
+        TODO: Test the newly defined flags.
         Tested.
         This method is the heart of this class. It "teaches" the neural network using the training data which is
         separated into mini batches of the size mini_batch_size. The weights and biases of the network are updated
@@ -283,10 +299,14 @@ class SimpleNeuralNetwork:
             learning data is processed as is.
         :param verification_data: This data has the same format as the learning_data. If data is provided, it is used to
             see how many images are verified correctly.
-        :return: None
+        :return: Returns the
         """
         self.check_shapes()  # Check the shapes.
         number_of_training_examples = len(learning_data)
+
+        # Empty lists which are filled if the associated flags are provided.
+        verification_cost, verification_accuracy = [], []
+        training_cost, training_accuracy = [], []
 
         # Test if the mini batch size divides the number of training examples if not an error is raised.
         if number_of_training_examples % mini_batch_size == 0:
@@ -315,15 +335,31 @@ class SimpleNeuralNetwork:
                 self.update_weights_and_biases((input_data_mat.T, desired_result_mat.T), mini_batch_size,
                                                learning_rate, reg_param, number_of_training_examples)
 
+            # If the according flags are provided redefine the input data and desired results.
+            if monitor_training_accuracy_flag or monitor_training_cost_flag:
+                input_data = input_data.reshape(number_of_training_examples, self.layer_sizes[0]).T
+                desired_results = desired_results.reshape(number_of_training_examples, self.layer_sizes[-1]).T
+            if monitor_training_accuracy_flag:
+                training_accuracy.append(self.calc_accuracy(input_data, desired_results))
+            if monitor_training_cost_flag:
+                training_cost.append(self.cross_entropy_cost(self.feed_forward(input_data), desired_results))
+
             # Use verification data if it is provided.
             if verification_data is not None:
                 # Count the correctly classified results.
-                counter = np.sum(verification_data[1] == np.apply_along_axis(np.argmax, 0,
-                                                                             self.feed_forward(verification_data[0])))
+                verification_counter = self.calc_accuracy(verification_data[0], verification_data[1])
+                if monitor_verification_accuracy_flag:
+                    verification_accuracy.append(verification_counter)
+                if monitor_verification_cost_flag:
+                    res = np.apply_along_axis(lmd.convert_number, 1, verification_data[1].reshape(verification_data[1].shape[0], 1))
+                    verification_cost.append(self.cross_entropy_cost(self.feed_forward(verification_data[0]), res.T))
+
                 # Print the result of how many images are identified correctly.
-                print(f"Epoch {index + 1}: {counter} out of {len(verification_data[1])}.")
+                print(f"Epoch {index + 1}: {verification_counter} out of {len(verification_data[1])}.")
             else:
                 print(f"Epoch {index + 1} finished.")
+
+        return np.array(training_cost), np.array(training_accuracy), np.array(verification_cost), np.array(verification_accuracy)
 
     def update_weights_and_biases(self, mini_batch: Tuple[np.ndarray, np.ndarray], mini_batch_size: int,
                                   learning_rate: float, reg_param: float, data_size: int) -> None:
