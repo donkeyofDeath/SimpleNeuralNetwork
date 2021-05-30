@@ -358,13 +358,13 @@ class SimpleNeuralNetwork:
                 act = self.update_weights_and_biases((input_data_mat, desired_result_mat), mini_batch_size,
                                                      learning_rate, reg_param, number_of_training_examples,
                                                      output_flag=training_flag)
-                # I could check the training data right here.
+                # I can make the calculations regarding the training data right here.
                 if monitor_training_accuracy_flag:
                     training_accuracy += self.calc_accuracy(act,
                                                             np.apply_along_axis(np.argmax, 0, desired_results)) / \
                                          number_of_training_examples
                 if monitor_training_cost_flag:
-
+                    pass
 
             # ----------
             # Monitoring
