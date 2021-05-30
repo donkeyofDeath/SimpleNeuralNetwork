@@ -310,8 +310,14 @@ class SimpleNeuralNetwork:
             return empty lists. The data is taken after a training epoch is completed. The data arrays are returned in
             the order: verification accuracy, verification cost, training accuracy, training cost.
         """
+
+        # ------
+        # Set up
+        # ------
+
         self.check_shapes()  # Check the shapes.
         number_of_training_examples = len(learning_data)
+        # Save this flag to later execute computationally heavy code only once.
         training_flag = monitor_training_cost_flag or monitor_training_accuracy_flag
 
         # Empty lists which are filled if the associated flags are provided.
@@ -322,6 +328,10 @@ class SimpleNeuralNetwork:
             number_of_mini_batches = int(number_of_training_examples / mini_batch_size)
         else:
             raise ValueError("The mini batch size has to divide the number of training examples.")
+
+        # ---------------------------
+        # Stochastic gradient descent
+        # ---------------------------
 
         # Iterate through all epochs.
         for index in range(number_of_epochs):
@@ -340,16 +350,19 @@ class SimpleNeuralNetwork:
             if training_flag:
                 output_data = np.zeros((number_of_mini_batches, self.layer_sizes[-1], mini_batch_size))
 
-            # Updates the weights and biases after going through the training data of a mini batch. I think this could
-            # be done more efficiently using numpy methods (maybe).
+            # Updates the weights and biases after going through the training data of a mini batch.
             for n, (input_data_mat, desired_result_mat) in enumerate(zip(input_data, desired_results)):
                 # The data needs to be transposed since to have the right format for the matrix multiplications,
                 act = self.update_weights_and_biases((input_data_mat.T, desired_result_mat.T), mini_batch_size,
                                                      learning_rate, reg_param, number_of_training_examples,
                                                      output_flag=training_flag)
-
+                # I could check the training data right here.
                 if training_flag:
                     output_data[n] = act
+
+            # ----------
+            # Monitoring
+            # ----------
 
             # Declare the input and output data.
             desired_results = desired_results.reshape(number_of_training_examples, self.layer_sizes[-1]).T
