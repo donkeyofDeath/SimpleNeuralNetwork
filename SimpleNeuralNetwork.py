@@ -312,6 +312,7 @@ class SimpleNeuralNetwork:
         """
         self.check_shapes()  # Check the shapes.
         number_of_training_examples = len(learning_data)
+        training_flag = monitor_training_cost_flag or monitor_training_accuracy_flag
 
         # Empty lists which are filled if the associated flags are provided.
         verification_cost, verification_accuracy, training_cost, training_accuracy = [], [], [], []
@@ -336,38 +337,44 @@ class SimpleNeuralNetwork:
             input_data = np.array(input_data).reshape(number_of_mini_batches, mini_batch_size, self.layer_sizes[0])
             desired_results = np.array(desired_results).reshape(number_of_mini_batches, mini_batch_size,
                                                                 self.layer_sizes[-1])
+            if training_flag:
+                output_data = np.zeros((number_of_mini_batches, self.layer_sizes[-1], mini_batch_size))
 
             # Updates the weights and biases after going through the training data of a mini batch. I think this could
             # be done more efficiently using numpy methods (maybe).
-            for input_data_mat, desired_result_mat in zip(input_data, desired_results):
+            for n, (input_data_mat, desired_result_mat) in enumerate(zip(input_data, desired_results)):
                 # The data needs to be transposed since to have the right format for the matrix multiplications,
-                self.update_weights_and_biases((input_data_mat.T, desired_result_mat.T), mini_batch_size,
-                                               learning_rate, reg_param, number_of_training_examples)
+                act = self.update_weights_and_biases((input_data_mat.T, desired_result_mat.T), mini_batch_size,
+                                                     learning_rate, reg_param, number_of_training_examples,
+                                                     output_flag=training_flag)
+
+                if training_flag:
+                    output_data[n] = act
 
             # Declare the input and output data.
-            input_data = input_data.reshape(number_of_training_examples, self.layer_sizes[0]).T
             desired_results = desired_results.reshape(number_of_training_examples, self.layer_sizes[-1]).T
 
             # Only do this if one of the flags is raised, since this part is very computationally expensive.
-            if monitor_training_accuracy_flag or monitor_training_cost_flag:
-                training_output = self.feed_forward(input_data)
-            if monitor_training_accuracy_flag:
-                # Ratio of correctly verified training examples.
-                train_ratio = self.calc_accuracy(training_output, np.apply_along_axis(np.argmax, 0, desired_results))\
-                             / number_of_training_examples
-                training_accuracy.append(train_ratio)
-            if monitor_training_cost_flag:
-                training_cost.append(self.cross_entropy_cost(training_output, desired_results))
+            if training_flag:
+                output_data = output_data.reshape(self.layer_sizes[-1], number_of_training_examples)
+                if monitor_training_accuracy_flag:
+                    # Ratio of correctly verified training examples.
+                    train_ratio = self.calc_accuracy(output_data, np.apply_along_axis(np.argmax, 0, desired_results)) \
+                                  / number_of_training_examples
+                    training_accuracy.append(train_ratio)
+                if monitor_training_cost_flag:
+                    training_cost.append(self.cross_entropy_cost(output_data, desired_results))
 
             # Use verification data if it is provided.
             if verification_data is not None:
-                verification_size = len(verification_data[1])
-                # Count the correctly classified results.
-                verification_output = self.feed_forward(verification_data[0])
-                verification_ratio = self.calc_accuracy(verification_output, verification_data[1])/verification_size
+                verification_size = len(verification_data[1])  # Save the length of the data.
+                verification_output = self.feed_forward(verification_data[0])  # Count the correctly classified results.
+                # Calculate the ratio of correctly identified verification examples.
+                verification_ratio = self.calc_accuracy(verification_output, verification_data[1]) / verification_size
                 if monitor_verification_accuracy_flag:
-                    verification_accuracy.append(verification_ratio)
+                    verification_accuracy.append(verification_ratio)  # Append the ratio.
                 if monitor_verification_cost_flag:
+
                     res = np.apply_along_axis(lmd.convert_number, 1, np.atleast_2d(verification_data[1]).T)
                     verification_cost.append(self.cross_entropy_cost(verification_output, res.T))
 
@@ -376,10 +383,12 @@ class SimpleNeuralNetwork:
             else:
                 print(f"Epoch {index + 1} finished.")
 
-        return np.array(verification_accuracy), np.array(verification_cost), np.array(training_accuracy), np.array(training_cost)
+        return np.array(verification_accuracy), np.array(verification_cost), np.array(training_accuracy), np.array(
+            training_cost)
 
     def update_weights_and_biases(self, mini_batch: Tuple[np.ndarray, np.ndarray], mini_batch_size: int,
-                                  learning_rate: float, reg_param: float, data_size: int) -> None:
+                                  learning_rate: float, reg_param: float, data_size: int,
+                                  output_flag: bool = False) -> bool:
         """
         Tested.
         Updates the weights and biases of the network using gradient descent and the back propagation algorithm.
@@ -393,7 +402,9 @@ class SimpleNeuralNetwork:
             often declared as an eta.
         :param reg_param: The variable lambda used in the L2 regularization formula.
         :param data_size: Number of elements in the training data.
-        :return: None.
+        :param output_flag: If this flag is raised the activations of the last layer of each call are returned.
+        :return: If the output_flag is raised, the last layer of the activations is returned. If it isn't raised the
+            method returns None.
         """
         activations = [mini_batch[0]]  # List containing the activations of all inputs for each layer.
         z_values = []  # List containing the z values of all inputs for each layer.
@@ -428,3 +439,6 @@ class SimpleNeuralNetwork:
                         np.dot(delta_mat, activation_mat.T) for delta_mat, activation_mat, weight_mat in
                         zip(deltas, activations[:-1], self.weights)]
         self.biases = [bias_vec - const * delta_mat.sum(axis=1) for delta_mat, bias_vec in zip(deltas, self.biases)]
+
+        if output_flag:
+            return activations[-1]
