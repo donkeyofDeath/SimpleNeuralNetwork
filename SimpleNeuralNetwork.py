@@ -347,18 +347,24 @@ class SimpleNeuralNetwork:
             input_data = np.array(input_data).reshape(number_of_mini_batches, mini_batch_size, self.layer_sizes[0])
             desired_results = np.array(desired_results).reshape(number_of_mini_batches, mini_batch_size,
                                                                 self.layer_sizes[-1])
-            if training_flag:
-                output_data = np.zeros((number_of_mini_batches, self.layer_sizes[-1], mini_batch_size))
+
+            training_accuracy_counter = 0
 
             # Updates the weights and biases after going through the training data of a mini batch.
             for n, (input_data_mat, desired_result_mat) in enumerate(zip(input_data, desired_results)):
                 # The data needs to be transposed since to have the right format for the matrix multiplications,
-                act = self.update_weights_and_biases((input_data_mat.T, desired_result_mat.T), mini_batch_size,
+                input_data_mat = input_data_mat.T
+                desired_result_mat = desired_result_mat.T
+                act = self.update_weights_and_biases((input_data_mat, desired_result_mat), mini_batch_size,
                                                      learning_rate, reg_param, number_of_training_examples,
                                                      output_flag=training_flag)
                 # I could check the training data right here.
-                if training_flag:
-                    output_data[n] = act
+                if monitor_training_accuracy_flag:
+                    training_accuracy += self.calc_accuracy(act,
+                                                            np.apply_along_axis(np.argmax, 0, desired_results)) / \
+                                         number_of_training_examples
+                if monitor_training_cost_flag:
+
 
             # ----------
             # Monitoring
@@ -401,7 +407,7 @@ class SimpleNeuralNetwork:
 
     def update_weights_and_biases(self, mini_batch: Tuple[np.ndarray, np.ndarray], mini_batch_size: int,
                                   learning_rate: float, reg_param: float, data_size: int,
-                                  output_flag: bool = False) -> bool:
+                                  output_flag: bool = False) -> np.ndarray:
         """
         Tested.
         Updates the weights and biases of the network using gradient descent and the back propagation algorithm.
