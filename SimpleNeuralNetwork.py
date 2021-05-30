@@ -16,8 +16,6 @@ def convert_array(array: np.array) -> np.array:
 
 class SimpleNeuralNetwork:
 
-    # TODO: Add monitoring.
-
     def __init__(self, layer_sizes: np.ndarray, weights: List[np.ndarray] = None, biases: List[np.ndarray] = None) \
             -> None:
         """
@@ -214,6 +212,20 @@ class SimpleNeuralNetwork:
         return np.sum(np.nan_to_num(-res_mat * np.log(act_mat) - (1 - res_mat) * np.log(1 - act_mat)).sum(axis=0)) / \
                act_mat.shape[1]
 
+    @staticmethod
+    def calc_accuracy(last_layer_activation: np.ndarray, desired_results: np.ndarray) -> int:
+        """
+        TODO: Test this method.
+        This method takes in a 2D numpy array of inputs in this array each column represents on data input. The desired
+        results is 1D numpy array of integers between 0 and 9. These numbers represent the correct output of the
+        network. The method calculates how many inputs have the correct output and returns the number.
+
+        :param last_layer_activation: 2D numpy array in which each column represents the activation in the last layer.
+        :param desired_results: Represents the correct output for each input.
+        :return: The number correctly verified inputs.
+        """
+        return np.sum(desired_results == np.apply_along_axis(np.argmax, 0, last_layer_activation))
+
     # --------------
     # Normal Methods
     # --------------
@@ -264,19 +276,6 @@ class SimpleNeuralNetwork:
 
         return self.current_layer
 
-    def calc_accuracy(self, input_data: np.ndarray, desired_results: np.ndarray) -> int:
-        """
-        TODO: Test this method.
-        This method takes in a 2D numpy array of inputs in this array each column represents on data input. The desired
-        results is 1D numpy array of integers between 0 and 9. These numbers represent the correct output of the
-        network. The method calculates how many inputs have the correct output and returns the number.
-
-        :param input_data: 2D numpy array in which each column represents the input data.
-        :param desired_results: Represents the correct output for each input.
-        :return: The number correctly verified inputs.
-        """
-        return np.sum(desired_results == np.apply_along_axis(np.argmax, 0, self.feed_forward(input_data)))
-
     def learn(self, learning_data: list, mini_batch_size: int, number_of_epochs: int, learning_rate: float,
               reg_param: float, shuffle_flag: bool = True, verification_data: Tuple[np.ndarray, np.ndarray] = None,
               monitor_training_cost_flag=False, monitor_training_accuracy_flag=False,
@@ -315,8 +314,7 @@ class SimpleNeuralNetwork:
         number_of_training_examples = len(learning_data)
 
         # Empty lists which are filled if the associated flags are provided.
-        verification_cost, verification_accuracy = [], []
-        training_cost, training_accuracy = [], []
+        verification_cost, verification_accuracy, training_cost, training_accuracy = [], [], [], []
 
         # Test if the mini batch size divides the number of training examples if not an error is raised.
         if number_of_training_examples % mini_batch_size == 0:
@@ -339,7 +337,8 @@ class SimpleNeuralNetwork:
             desired_results = np.array(desired_results).reshape(number_of_mini_batches, mini_batch_size,
                                                                 self.layer_sizes[-1])
 
-            # Updates the weights and biases after going through the training data of a mini batch.
+            # Updates the weights and biases after going through the training data of a mini batch. I think this could
+            # be done more efficiently using numpy methods (maybe).
             for input_data_mat, desired_result_mat in zip(input_data, desired_results):
                 # The data needs to be transposed since to have the right format for the matrix multiplications,
                 self.update_weights_and_biases((input_data_mat.T, desired_result_mat.T), mini_batch_size,
@@ -348,24 +347,29 @@ class SimpleNeuralNetwork:
             # Declare the input and output data.
             input_data = input_data.reshape(number_of_training_examples, self.layer_sizes[0]).T
             desired_results = desired_results.reshape(number_of_training_examples, self.layer_sizes[-1]).T
+
+            # Only do this if one of the flags is raised, since this part is very computationally expensive.
+            if monitor_training_accuracy_flag or monitor_training_cost_flag:
+                training_output = self.feed_forward(input_data)
             if monitor_training_accuracy_flag:
                 # Ratio of correctly verified training examples.
-                train_ratio = self.calc_accuracy(input_data, np.apply_along_axis(np.argmax, 0, desired_results))\
+                train_ratio = self.calc_accuracy(training_output, np.apply_along_axis(np.argmax, 0, desired_results))\
                              / number_of_training_examples
                 training_accuracy.append(train_ratio)
             if monitor_training_cost_flag:
-                training_cost.append(self.cross_entropy_cost(self.feed_forward(input_data), desired_results))
+                training_cost.append(self.cross_entropy_cost(training_output, desired_results))
 
             # Use verification data if it is provided.
             if verification_data is not None:
                 verification_size = len(verification_data[1])
                 # Count the correctly classified results.
-                verification_ratio = self.calc_accuracy(verification_data[0], verification_data[1])/verification_size
+                verification_output = self.feed_forward(verification_data[0])
+                verification_ratio = self.calc_accuracy(verification_output, verification_data[1])/verification_size
                 if monitor_verification_accuracy_flag:
                     verification_accuracy.append(verification_ratio)
                 if monitor_verification_cost_flag:
                     res = np.apply_along_axis(lmd.convert_number, 1, np.atleast_2d(verification_data[1]).T)
-                    verification_cost.append(self.cross_entropy_cost(self.feed_forward(verification_data[0]), res.T))
+                    verification_cost.append(self.cross_entropy_cost(verification_output, res.T))
 
                 # Print the result of how many images are identified correctly.
                 print(f"Epoch {index + 1}: {100 * verification_ratio:.2f} %.")
