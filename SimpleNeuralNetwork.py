@@ -2,9 +2,7 @@ import numpy as np
 import random as rand
 from typing import Tuple, List
 import loadMnistData as lmd
-
-
-# import time as tm
+import time as tm
 
 
 def convert_array(array: np.array) -> np.array:
@@ -381,8 +379,11 @@ class SimpleNeuralNetwork:
                 output_data = output_data.reshape(self.layer_sizes[-1], number_of_training_examples)
                 if monitor_training_accuracy_flag:
                     # Ratio of correctly verified training examples.
-                    train_ratio = self.calc_accuracy(output_data, np.apply_along_axis(np.argmax, 0, desired_results)) \
-                                  / number_of_training_examples
+                    start = tm.time()
+                    converted_results = np.apply_along_axis(np.argmax, 0, desired_results)
+                    end = tm.time()
+                    print(f"converting the results needed {end - start:.2f} s.")
+                    train_ratio = self.calc_accuracy(output_data, converted_results) / number_of_training_examples
                     training_accuracy.append(train_ratio)
                 if monitor_training_cost_flag:
                     training_cost.append(self.cross_entropy_cost(output_data, desired_results))
