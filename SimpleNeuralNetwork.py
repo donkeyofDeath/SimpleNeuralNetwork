@@ -217,7 +217,6 @@ class SimpleNeuralNetwork:
     def calc_accuracy(last_layer_activation: np.ndarray, desired_results: np.ndarray) -> int:
         """
         TODO: Test this method.
-        TODO: MAKE THIS METHOD FASTER. IT IS SLOW AS FUCK.
         This method takes in a 2D numpy array of inputs in this array each column represents on data input. The desired
         results is 1D numpy array of integers between 0 and 9. These numbers represent the correct output of the
         network. The method calculates how many inputs have the correct output and returns the number.
@@ -285,6 +284,8 @@ class SimpleNeuralNetwork:
             -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
         TODO: Test the newly defined flags.
+        TODO: Change the format of the training data to be a tuple of three with one array containing the numbers
+        TODO:   corresponding to the handwriting.
         Tested.
         This method is the heart of this class. It "teaches" the neural network using the training data which is
         separated into mini batches of the size mini_batch_size. The weights and biases of the network are updated
@@ -352,9 +353,6 @@ class SimpleNeuralNetwork:
 
             if training_flag:
                 output_data = np.zeros((number_of_mini_batches, self.layer_sizes[-1], mini_batch_size))
-
-            # training_accuracy_counter = 0
-            # training_cost_counter = 0.
 
             # Updates the weights and biases after going through the training data of a mini batch.
             for n, (input_data_mat, desired_result_mat) in enumerate(zip(input_data, desired_results)):
