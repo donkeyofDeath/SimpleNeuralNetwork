@@ -4,6 +4,9 @@ from typing import Tuple, List
 import loadMnistData as lmd
 
 
+# import time as tm
+
+
 def convert_array(array: np.array) -> np.array:
     """
     Convert a 1D numpy array into a 2D matrix with one column.
@@ -216,6 +219,7 @@ class SimpleNeuralNetwork:
     def calc_accuracy(last_layer_activation: np.ndarray, desired_results: np.ndarray) -> int:
         """
         TODO: Test this method.
+        TODO: MAKE THIS METHOD FASTER. IT IS SLOW AS FUCK.
         This method takes in a 2D numpy array of inputs in this array each column represents on data input. The desired
         results is 1D numpy array of integers between 0 and 9. These numbers represent the correct output of the
         network. The method calculates how many inputs have the correct output and returns the number.
@@ -302,10 +306,10 @@ class SimpleNeuralNetwork:
             learning data is processed as is.
         :param verification_data: This data has the same format as the learning_data. If data is provided, it is used to
             see how many images are verified correctly.
-        :param monitor_verification_accuracy_flag: Monitoring flag of the accuracy on the verification data for each epoch.
-        :param monitor_verification_cost_flag: Monitoring flag of the cost function of the verification for each epoch
-        :param monitor_training_accuracy_flag: Monitoring flag of the accuracy on the training data for each epoch.
         :param monitor_training_cost_flag: Monitoring flag of the cost function of the training data for each epoch.
+        :param monitor_training_accuracy_flag: Monitoring flag of the accuracy on the training data for each epoch.
+        :param monitor_verification_cost_flag: Monitoring flag of the cost function of the verification for each epoch.
+        :param monitor_verification_accuracy_flag: Monitoring flag of the accuracy on the verification data for each epoch.
         :return: Returns four numpy arrays containing the data according to the set flags. Flags which were not set
             return empty lists. The data is taken after a training epoch is completed. The data arrays are returned in
             the order: verification accuracy, verification cost, training accuracy, training cost.
@@ -348,7 +352,11 @@ class SimpleNeuralNetwork:
             desired_results = np.array(desired_results).reshape(number_of_mini_batches, mini_batch_size,
                                                                 self.layer_sizes[-1])
 
-            training_accuracy_counter = 0
+            if training_flag:
+                output_data = np.zeros((number_of_mini_batches, self.layer_sizes[-1], mini_batch_size))
+
+            # training_accuracy_counter = 0
+            # training_cost_counter = 0.
 
             # Updates the weights and biases after going through the training data of a mini batch.
             for n, (input_data_mat, desired_result_mat) in enumerate(zip(input_data, desired_results)):
@@ -358,13 +366,8 @@ class SimpleNeuralNetwork:
                 act = self.update_weights_and_biases((input_data_mat, desired_result_mat), mini_batch_size,
                                                      learning_rate, reg_param, number_of_training_examples,
                                                      output_flag=training_flag)
-                # I can make the calculations regarding the training data right here.
-                if monitor_training_accuracy_flag:
-                    training_accuracy += self.calc_accuracy(act,
-                                                            np.apply_along_axis(np.argmax, 0, desired_results)) / \
-                                         number_of_training_examples
-                if monitor_training_cost_flag:
-                    pass
+                if training_flag:
+                    output_data[n] = act
 
             # ----------
             # Monitoring
@@ -393,7 +396,6 @@ class SimpleNeuralNetwork:
                 if monitor_verification_accuracy_flag:
                     verification_accuracy.append(verification_ratio)  # Append the ratio.
                 if monitor_verification_cost_flag:
-
                     res = np.apply_along_axis(lmd.convert_number, 1, np.atleast_2d(verification_data[1]).T)
                     verification_cost.append(self.cross_entropy_cost(verification_output, res.T))
 
@@ -402,8 +404,8 @@ class SimpleNeuralNetwork:
             else:
                 print(f"Epoch {index + 1} finished.")
 
-        return np.array(verification_accuracy), np.array(verification_cost), np.array(training_accuracy), np.array(
-            training_cost)
+        return np.array(training_cost), np.array(training_accuracy), np.array(verification_cost),\
+               np.array(verification_accuracy)
 
     def update_weights_and_biases(self, mini_batch: Tuple[np.ndarray, np.ndarray], mini_batch_size: int,
                                   learning_rate: float, reg_param: float, data_size: int,
