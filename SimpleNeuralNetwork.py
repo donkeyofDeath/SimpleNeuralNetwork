@@ -2,7 +2,7 @@ import numpy as np
 import random as rand
 from typing import Tuple, List
 import loadMnistData as lmd
-import time as tm
+# import time as tm
 
 
 def convert_array(array: np.array) -> np.array:
@@ -217,6 +217,7 @@ class SimpleNeuralNetwork:
     def calc_accuracy(last_layer_activation: np.ndarray, desired_results: np.ndarray) -> int:
         """
         TODO: Test this method.
+        TODO: Make this method faster.
         This method takes in a 2D numpy array of inputs in this array each column represents on data input. The desired
         results is 1D numpy array of integers between 0 and 9. These numbers represent the correct output of the
         network. The method calculates how many inputs have the correct output and returns the number.
@@ -284,8 +285,6 @@ class SimpleNeuralNetwork:
             -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """
         TODO: Test the newly defined flags.
-        TODO: Change the format of the training data to be a tuple of three with one array containing the numbers
-        TODO:   corresponding to the handwriting.
         Tested.
         This method is the heart of this class. It "teaches" the neural network using the training data which is
         separated into mini batches of the size mini_batch_size. The weights and biases of the network are updated
@@ -293,9 +292,10 @@ class SimpleNeuralNetwork:
         entropy cost function is used for the learning procedure as well L2 regularization. The method returns the data
         which is set by the flags to be returned. If no flags are the set method returns four empty lists.
 
-        :param learning_data: Data containing tuples of numpy arrays. The first numpy array contains the input data for
-            the neural network. The second numpy array contains the desired output of the network corresponding to the
-            the input.
+        :param learning_data: Data containing tuples of three elements. The first element is a numpy array and contains
+            the input data for the neural network. The second element is also a numpy array contains the desired output
+            of the network corresponding to the input. The last entry of the tuple is a number representing the written
+            number which is represented by the input data (first numpy array).
         :param mini_batch_size: Number of inputs in a mini batch.
         :param number_of_epochs: Number of epochs that are executed.
         :param learning_rate: Learning rate used in the gradient descent. This number is often declared as the greek
@@ -344,18 +344,20 @@ class SimpleNeuralNetwork:
                 rand.shuffle(learning_data)
 
             # Recombine the shuffled data.
-            input_data, desired_results = zip(*learning_data)
+            input_data, desired_output, numbers = zip(*learning_data)
 
-            # Divide training data into mini batches of the same size.
+            # Divide training data into mini batches of the same size and convert them into numpy arrays.
             input_data = np.array(input_data).reshape(number_of_mini_batches, mini_batch_size, self.layer_sizes[0])
-            desired_results = np.array(desired_results).reshape(number_of_mini_batches, mini_batch_size,
+            desired_output = np.array(desired_output).reshape(number_of_mini_batches, mini_batch_size,
                                                                 self.layer_sizes[-1])
 
             if training_flag:
+                numbers = np.array(numbers)  # Convert to a numpy array.
+                #
                 output_data = np.zeros((number_of_mini_batches, self.layer_sizes[-1], mini_batch_size))
 
             # Updates the weights and biases after going through the training data of a mini batch.
-            for n, (input_data_mat, desired_result_mat) in enumerate(zip(input_data, desired_results)):
+            for n, (input_data_mat, desired_result_mat) in enumerate(zip(input_data, desired_output)):
                 # The data needs to be transposed since to have the right format for the matrix multiplications,
                 input_data_mat = input_data_mat.T
                 desired_result_mat = desired_result_mat.T
@@ -369,28 +371,28 @@ class SimpleNeuralNetwork:
             # Monitoring
             # ----------
 
-            # Declare the input and output data.
-            desired_results = desired_results.reshape(number_of_training_examples, self.layer_sizes[-1]).T
-
             # Only do this if one of the flags is raised, since this part is very computationally expensive.
             if training_flag:
+                # Declare the input and output data.
+                # print(numbers.shape)
+                desired_output = desired_output.reshape(number_of_training_examples, self.layer_sizes[-1]).T
                 output_data = output_data.reshape(self.layer_sizes[-1], number_of_training_examples)
                 if monitor_training_accuracy_flag:
                     # Ratio of correctly verified training examples.
-                    start = tm.time()
-                    converted_results = np.apply_along_axis(np.argmax, 0, desired_results)
-                    end = tm.time()
-                    print(f"converting the results needed {end - start:.2f} s.")
-                    train_ratio = self.calc_accuracy(output_data, converted_results) / number_of_training_examples
+                    # start = tm.time()
+                    train_ratio = self.calc_accuracy(output_data, numbers) / number_of_training_examples
+                    # end = tm.time()
+                    # print(f"Accuracy calculation needed {end - start} s.")
                     training_accuracy.append(train_ratio)
                 if monitor_training_cost_flag:
-                    training_cost.append(self.cross_entropy_cost(output_data, desired_results))
+                    training_cost.append(self.cross_entropy_cost(output_data, desired_output))
 
             # Use verification data if it is provided.
             if verification_data is not None:
                 verification_size = len(verification_data[1])  # Save the length of the data.
                 verification_output = self.feed_forward(verification_data[0])  # Count the correctly classified results.
                 # Calculate the ratio of correctly identified verification examples.
+                print(verification_data[1].shape)
                 verification_ratio = self.calc_accuracy(verification_output, verification_data[1]) / verification_size
                 if monitor_verification_accuracy_flag:
                     verification_accuracy.append(verification_ratio)  # Append the ratio.
