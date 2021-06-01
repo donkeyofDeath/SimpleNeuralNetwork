@@ -2,7 +2,9 @@ import numpy as np
 import random as rand
 from typing import Tuple, List
 import loadMnistData as lmd
-import time as tm
+
+
+# import time as tm
 
 
 def convert_array(array: np.array) -> np.array:
@@ -176,7 +178,7 @@ class SimpleNeuralNetwork:
         :return: A 3D numpy array
         """
         rows, columns = mat.shape
-        return mat.reshape(num_of_mats, rows//num_of_mats, columns).transpose(0, 2, 1)
+        return mat.reshape(num_of_mats, rows // num_of_mats, columns).transpose(0, 2, 1)
 
     @staticmethod
     def reverse_transform_tensor(tensor: np.ndarray) -> np.ndarray:
@@ -381,11 +383,12 @@ class SimpleNeuralNetwork:
 
             # Updates the weights and biases after going through the training data of a mini batch.
             for n, (input_data_mat, desired_result_mat) in enumerate(zip(input_data, desired_output)):
+                # Save the activation of the last layer
                 act = self.update_weights_and_biases((input_data_mat, desired_result_mat), mini_batch_size,
                                                      learning_rate, reg_param, number_of_training_examples,
                                                      output_flag=training_flag)
                 if training_flag:
-                    output_data[n] = act
+                    output_data[n] = act  # Append the activation to the array containing the all the outputs.
 
             # ----------
             # Monitoring
