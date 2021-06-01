@@ -169,6 +169,18 @@ class SimpleNeuralNetwork:
     # --------------
 
     @staticmethod
+    def mat_transform(mat: np.ndarray, num_of_mats: int):
+        """
+        Transposes a matrix and divides it along the column into num_of_mats many sub matrices.
+
+        :param mat: Matrix to be turned into a array of matrices.
+        :param num_of_mats: Number of matrices.
+        :return: A 3D numpy array
+        """
+        rows, columns = mat.shape
+        return mat.reshape(num_of_mats, rows//num_of_mats, columns).transpose(0, 2, 1)
+
+    @staticmethod
     def sigmoid_derivative(num):
         """
         Tested.
@@ -365,8 +377,8 @@ class SimpleNeuralNetwork:
                 act = self.update_weights_and_biases((input_data_mat, desired_result_mat), mini_batch_size,
                                                      learning_rate, reg_param, number_of_training_examples,
                                                      output_flag=training_flag)
-                if training_flag:
-                    output_data[n] = act
+                # if training_flag:
+                    # output_data[n] = act
 
             # ----------
             # Monitoring
@@ -377,7 +389,8 @@ class SimpleNeuralNetwork:
                 # Declare the input and output data.
                 # print(numbers.shape)
                 desired_output = desired_output.reshape(number_of_training_examples, self.layer_sizes[-1]).T
-                output_data = output_data.reshape(self.layer_sizes[-1], number_of_training_examples)
+                # output_data = output_data.reshape(self.layer_sizes[-1], number_of_training_examples)
+                output_data = self.feed_forward(input_data.reshape(number_of_training_examples, self.layer_sizes[0]).T)
                 if monitor_training_accuracy_flag:
                     # Ratio of correctly verified training examples.
                     # start = tm.time()
