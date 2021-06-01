@@ -238,7 +238,7 @@ class SimpleNeuralNetwork:
                act_mat.shape[1]
 
     @staticmethod
-    def calc_accuracy(last_layer_activation: np.ndarray, desired_results: np.ndarray) -> int:
+    def calc_accuracy(last_layer_activation: np.ndarray, written_numbers: np.ndarray) -> int:
         """
         TODO: Test this method.
         TODO: Make this method faster.
@@ -247,10 +247,10 @@ class SimpleNeuralNetwork:
         network. The method calculates how many inputs have the correct output and returns the number.
 
         :param last_layer_activation: 2D numpy array in which each column represents the activation in the last layer.
-        :param desired_results: 1D numpy array representing the correct output for each input (hand written number).
+        :param written_numbers: 1D numpy array representing the correct output for each input (hand written number).
         :return: The number of correctly verified inputs.
         """
-        return np.sum(desired_results == np.apply_along_axis(np.argmax, 0, last_layer_activation))
+        return np.sum(written_numbers == np.apply_along_axis(np.argmax, 0, last_layer_activation))
 
     # --------------
     # Normal Methods
@@ -375,12 +375,12 @@ class SimpleNeuralNetwork:
             desired_output = self.transform_matrix(np.array(desired_output), number_of_mini_batches)
 
             if training_flag:
-                numbers = np.array(numbers)  # Convert to a numpy array.
+                numbers = np.array(numbers)  # Convert back to a numpy array.
+                # Declare empty array which will be filled with the output data of the network.
                 output_data = np.zeros((number_of_mini_batches, self.layer_sizes[-1], mini_batch_size))
 
             # Updates the weights and biases after going through the training data of a mini batch.
             for n, (input_data_mat, desired_result_mat) in enumerate(zip(input_data, desired_output)):
-                # The data needs to be transposed since to have the right format for the matrix multiplications,
                 act = self.update_weights_and_biases((input_data_mat, desired_result_mat), mini_batch_size,
                                                      learning_rate, reg_param, number_of_training_examples,
                                                      output_flag=training_flag)
@@ -394,10 +394,7 @@ class SimpleNeuralNetwork:
             # Only do this if one of the flags is raised, since this part is very computationally expensive.
             if training_flag:
                 # Declare the input and output data.
-                # start = tm.time()
                 desired_output = self.reverse_transform_tensor(desired_output)
-                # end = tm.time()
-                # print(f"Execution time {end - start} s.")
                 output_data = self.reverse_transform_tensor(output_data)
                 if monitor_training_accuracy_flag:
                     # Ratio of correctly verified training examples.
@@ -413,8 +410,10 @@ class SimpleNeuralNetwork:
                 # Calculate the ratio of correctly identified verification examples.
                 verification_ratio = self.calc_accuracy(verification_output, verification_data[1]) / verification_size
                 if monitor_verification_accuracy_flag:
-                    verification_accuracy.append(verification_ratio)  # Append the ratio.
+                    verification_accuracy.append(verification_ratio)
                 if monitor_verification_cost_flag:
+                    # Convert the list of numbers to the corresponding outputs of the network and calculate the cross
+                    # entropy cost function.
                     res = np.apply_along_axis(lmd.convert_number, 1, np.atleast_2d(verification_data[1]).T)
                     verification_cost.append(self.cross_entropy_cost(verification_output, res.T))
 
