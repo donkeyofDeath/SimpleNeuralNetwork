@@ -4,9 +4,6 @@ from typing import Tuple, List
 import loadMnistData as lmd
 
 
-# import time as tm
-
-
 def convert_array(array: np.array) -> np.array:
     """
     Convert a 1D numpy array into a 2D matrix with one column.
@@ -243,7 +240,6 @@ class SimpleNeuralNetwork:
     def calc_accuracy(last_layer_activation: np.ndarray, written_numbers: np.ndarray) -> int:
         """
         TODO: Test this method.
-        TODO: Make this method faster.
         This method takes in a 2D numpy array of inputs in this array each column represents on data input. The desired
         results is 1D numpy array of integers between 0 and 9. These numbers represent the correct output of the
         network. The method calculates how many inputs have the correct output and returns the number.
@@ -252,7 +248,7 @@ class SimpleNeuralNetwork:
         :param written_numbers: 1D numpy array representing the correct output for each input (hand written number).
         :return: The number of correctly verified inputs.
         """
-        return np.sum(written_numbers == np.apply_along_axis(np.argmax, 0, last_layer_activation))
+        return np.sum(written_numbers == np.argmax(last_layer_activation, axis=0))
 
     # --------------
     # Normal Methods
@@ -408,17 +404,16 @@ class SimpleNeuralNetwork:
 
             # Use verification data if it is provided.
             if verification_data is not None:
-                verification_size = len(verification_data[1])  # Save the length of the data.
                 verification_output = self.feed_forward(verification_data[0])  # Count the correctly classified results.
                 # Calculate the ratio of correctly identified verification examples.
-                verification_ratio = self.calc_accuracy(verification_output, verification_data[1]) / verification_size
+                verification_ratio = self.calc_accuracy(verification_output, verification_data[1]) / len(verification_data[1])
                 if monitor_verification_accuracy_flag:
                     verification_accuracy.append(verification_ratio)
                 if monitor_verification_cost_flag:
                     # Convert the list of numbers to the corresponding outputs of the network and calculate the cross
                     # entropy cost function.
-                    res = np.apply_along_axis(lmd.convert_number, 1, np.atleast_2d(verification_data[1]).T)
-                    verification_cost.append(self.cross_entropy_cost(verification_output, res.T))
+                    result = np.apply_along_axis(lmd.convert_number, 1, np.atleast_2d(verification_data[1]).T)
+                    verification_cost.append(self.cross_entropy_cost(verification_output, result.T))
 
                 # Print the result of how many images are identified correctly.
                 print(f"Epoch {index + 1}: {100 * verification_ratio:.2f} %.")
