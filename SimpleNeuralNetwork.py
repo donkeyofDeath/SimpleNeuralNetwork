@@ -2,9 +2,7 @@ import numpy as np
 import random as rand
 from typing import Tuple, List
 import loadMnistData as lmd
-
-
-# import time as tm
+import time as tm
 
 
 def convert_array(array: np.array) -> np.array:
@@ -169,7 +167,7 @@ class SimpleNeuralNetwork:
     # --------------
 
     @staticmethod
-    def mat_transform(mat: np.ndarray, num_of_mats: int):
+    def transform_matrix(mat: np.ndarray, num_of_mats: int) -> np.ndarray:
         """
         Transposes a matrix and divides it along the column into num_of_mats many sub matrices.
 
@@ -179,6 +177,18 @@ class SimpleNeuralNetwork:
         """
         rows, columns = mat.shape
         return mat.reshape(num_of_mats, rows//num_of_mats, columns).transpose(0, 2, 1)
+
+    @staticmethod
+    def reverse_transform_tensor(tensor: np.ndarray) -> np.ndarray:
+        """
+        This function takes in a 3D numpy array and flattens it one the first level, making it a 2D numpy array.
+        This function basically concatenates all the matrices together.
+
+        :param tensor: A 3D numpy array which can be seen as a list of matrices.
+        :return: A flattened version of the 3D numpy array which is now 2D
+        """
+        num_mats, num_rows, num_cols = tensor.shape
+        return tensor.transpose(0, 2, 1).reshape(num_cols * num_mats, num_rows).T
 
     @staticmethod
     def sigmoid_derivative(num):
@@ -361,9 +371,8 @@ class SimpleNeuralNetwork:
             input_data, desired_output, numbers = zip(*learning_data)
 
             # Divide training data into mini batches of the same size and convert them into numpy arrays.
-            input_data = np.array(input_data).reshape(number_of_mini_batches, mini_batch_size, self.layer_sizes[0])
-            desired_output = np.array(desired_output).reshape(number_of_mini_batches, mini_batch_size,
-                                                              self.layer_sizes[-1])
+            input_data = self.transform_matrix(np.array(input_data), number_of_mini_batches)
+            desired_output = self.transform_matrix(np.array(desired_output), number_of_mini_batches)
 
             if training_flag:
                 numbers = np.array(numbers)  # Convert to a numpy array.
@@ -372,13 +381,11 @@ class SimpleNeuralNetwork:
             # Updates the weights and biases after going through the training data of a mini batch.
             for n, (input_data_mat, desired_result_mat) in enumerate(zip(input_data, desired_output)):
                 # The data needs to be transposed since to have the right format for the matrix multiplications,
-                input_data_mat = input_data_mat.T
-                desired_result_mat = desired_result_mat.T
                 act = self.update_weights_and_biases((input_data_mat, desired_result_mat), mini_batch_size,
                                                      learning_rate, reg_param, number_of_training_examples,
                                                      output_flag=training_flag)
-                # if training_flag:
-                    # output_data[n] = act
+                if training_flag:
+                    output_data[n] = act
 
             # ----------
             # Monitoring
@@ -387,20 +394,15 @@ class SimpleNeuralNetwork:
             # Only do this if one of the flags is raised, since this part is very computationally expensive.
             if training_flag:
                 # Declare the input and output data.
-                # print(numbers.shape)
-                desired_output = desired_output.reshape(number_of_training_examples, self.layer_sizes[-1]).T
-                # output_data = output_data.reshape(self.layer_sizes[-1], number_of_training_examples)
-                output_data = self.feed_forward(input_data.reshape(number_of_training_examples, self.layer_sizes[0]).T)
+                # start = tm.time()
+                desired_output = self.reverse_transform_tensor(desired_output)
+                # end = tm.time()
+                # print(f"Execution time {end - start} s.")
+                output_data = self.reverse_transform_tensor(output_data)
                 if monitor_training_accuracy_flag:
                     # Ratio of correctly verified training examples.
-                    # start = tm.time()
-                    train_ratio = self.calc_accuracy(output_data, np.apply_along_axis(np.argmax, 0, desired_output)) / \
-                                  number_of_training_examples
                     train_ratio_test = self.calc_accuracy(output_data, numbers) / number_of_training_examples
-                    print(train_ratio == train_ratio_test)
-                    # end = tm.time()
-                    # print(f"Accuracy calculation needed {end - start} s.")
-                    training_accuracy.append(train_ratio)
+                    training_accuracy.append(train_ratio_test)
                 if monitor_training_cost_flag:
                     training_cost.append(self.cross_entropy_cost(output_data, desired_output))
 
@@ -409,7 +411,6 @@ class SimpleNeuralNetwork:
                 verification_size = len(verification_data[1])  # Save the length of the data.
                 verification_output = self.feed_forward(verification_data[0])  # Count the correctly classified results.
                 # Calculate the ratio of correctly identified verification examples.
-                # print(verification_data[1].shape)
                 verification_ratio = self.calc_accuracy(verification_output, verification_data[1]) / verification_size
                 if monitor_verification_accuracy_flag:
                     verification_accuracy.append(verification_ratio)  # Append the ratio.
