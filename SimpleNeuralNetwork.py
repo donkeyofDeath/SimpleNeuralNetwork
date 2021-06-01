@@ -2,6 +2,8 @@ import numpy as np
 import random as rand
 from typing import Tuple, List
 import loadMnistData as lmd
+
+
 # import time as tm
 
 
@@ -223,8 +225,8 @@ class SimpleNeuralNetwork:
         network. The method calculates how many inputs have the correct output and returns the number.
 
         :param last_layer_activation: 2D numpy array in which each column represents the activation in the last layer.
-        :param desired_results: Represents the correct output for each input.
-        :return: The number correctly verified inputs.
+        :param desired_results: 1D numpy array representing the correct output for each input (hand written number).
+        :return: The number of correctly verified inputs.
         """
         return np.sum(desired_results == np.apply_along_axis(np.argmax, 0, last_layer_activation))
 
@@ -349,11 +351,10 @@ class SimpleNeuralNetwork:
             # Divide training data into mini batches of the same size and convert them into numpy arrays.
             input_data = np.array(input_data).reshape(number_of_mini_batches, mini_batch_size, self.layer_sizes[0])
             desired_output = np.array(desired_output).reshape(number_of_mini_batches, mini_batch_size,
-                                                                self.layer_sizes[-1])
+                                                              self.layer_sizes[-1])
 
             if training_flag:
                 numbers = np.array(numbers)  # Convert to a numpy array.
-                #
                 output_data = np.zeros((number_of_mini_batches, self.layer_sizes[-1], mini_batch_size))
 
             # Updates the weights and biases after going through the training data of a mini batch.
@@ -380,7 +381,10 @@ class SimpleNeuralNetwork:
                 if monitor_training_accuracy_flag:
                     # Ratio of correctly verified training examples.
                     # start = tm.time()
-                    train_ratio = self.calc_accuracy(output_data, numbers) / number_of_training_examples
+                    train_ratio = self.calc_accuracy(output_data, np.apply_along_axis(np.argmax, 0, desired_output)) / \
+                                  number_of_training_examples
+                    train_ratio_test = self.calc_accuracy(output_data, numbers) / number_of_training_examples
+                    print(train_ratio == train_ratio_test)
                     # end = tm.time()
                     # print(f"Accuracy calculation needed {end - start} s.")
                     training_accuracy.append(train_ratio)
@@ -392,7 +396,7 @@ class SimpleNeuralNetwork:
                 verification_size = len(verification_data[1])  # Save the length of the data.
                 verification_output = self.feed_forward(verification_data[0])  # Count the correctly classified results.
                 # Calculate the ratio of correctly identified verification examples.
-                print(verification_data[1].shape)
+                # print(verification_data[1].shape)
                 verification_ratio = self.calc_accuracy(verification_output, verification_data[1]) / verification_size
                 if monitor_verification_accuracy_flag:
                     verification_accuracy.append(verification_ratio)  # Append the ratio.
@@ -405,7 +409,7 @@ class SimpleNeuralNetwork:
             else:
                 print(f"Epoch {index + 1} finished.")
 
-        return np.array(training_cost), np.array(training_accuracy), np.array(verification_cost),\
+        return np.array(training_cost), np.array(training_accuracy), np.array(verification_cost), \
                np.array(verification_accuracy)
 
     def update_weights_and_biases(self, mini_batch: Tuple[np.ndarray, np.ndarray], mini_batch_size: int,
