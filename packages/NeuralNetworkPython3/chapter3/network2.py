@@ -331,10 +331,16 @@ def sigmoid_prime(z):
     """Derivative of the sigmoid function."""
     return sigmoid(z)*(1-sigmoid(z))
 
-import sys
-sys.path.append("../")
 
-import mnist_loader
-training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
-net = Network([784, 30, 10])
-net.SGD(training_data, 30, 10, 0.5, lmbda =5, evaluation_data=test_data,monitor_evaluation_accuracy=True)
+if __name__ == "__main__":
+    import sys
+    sys.path.append("../")
+    import mnist_loader
+    import time as tm
+
+    training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
+    net = Network([784, 30, 10])
+    start = tm.time()
+    net.SGD(training_data, 10, 10, 0.5, lmbda=5, evaluation_data=test_data, monitor_evaluation_accuracy=True)
+    end = tm.time()
+    print(f"Execution time {end - start} s.")

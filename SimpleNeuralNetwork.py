@@ -2,6 +2,7 @@ import numpy as np
 import random as rand
 from typing import Tuple, List
 import loadMnistData as lmd
+import time as tm
 
 
 def convert_array(array: np.array) -> np.array:
@@ -168,6 +169,7 @@ class SimpleNeuralNetwork:
     @staticmethod
     def transform_matrix(mat: np.ndarray, num_of_mats: int) -> np.ndarray:
         """
+        TODO: Test this method.s
         Transposes a matrix and divides it along the column into num_of_mats many sub matrices.
 
         :param mat: Matrix to be turned into a array of matrices.
@@ -180,6 +182,7 @@ class SimpleNeuralNetwork:
     @staticmethod
     def reverse_transform_tensor(tensor: np.ndarray) -> np.ndarray:
         """
+        TODO: Test this method.
         This function takes in a 3D numpy array and flattens it one the first level, making it a 2D numpy array.
         This function basically concatenates all the matrices together.
 
@@ -188,6 +191,7 @@ class SimpleNeuralNetwork:
         """
         num_mats, num_rows, num_cols = tensor.shape
         return tensor.transpose(0, 2, 1).reshape(num_cols * num_mats, num_rows).T
+        # return np.concatenate(tensor, axis=1)
 
     @staticmethod
     def sigmoid_derivative(num):
