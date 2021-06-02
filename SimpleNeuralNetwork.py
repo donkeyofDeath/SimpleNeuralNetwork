@@ -388,7 +388,7 @@ class SimpleNeuralNetwork:
                                                      learning_rate, reg_param, number_of_training_examples,
                                                      output_flag=training_flag)
                 if training_flag:
-                    output_data[n] = act  # Append the activation to the array containing the all the outputs.
+                    output_data[n] = act  # Append the activation to the array containing all the outputs.
 
             # ----------
             # Monitoring
