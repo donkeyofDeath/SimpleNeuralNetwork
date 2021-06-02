@@ -34,10 +34,10 @@ start = tm.time()
 # Let the neural network learn.
 train_cost, train_acc, ver_cost, ver_acc = neural_network.learn(TRAINING_DATA, MINI_BATCH_SIZE, EPOCHS, LEARNING_RATE,
                                                                 REG_PARAM, verification_data=VERIFICATION_DATA,
-                                                                monitor_training_accuracy_flag=True,
-                                                                monitor_training_cost_flag=True,
-                                                                monitor_verification_accuracy_flag=True,
-                                                                monitor_verification_cost_flag=True)
+                                                                monitor_training_accuracy_flag=False,
+                                                                monitor_training_cost_flag=False,
+                                                                monitor_verification_accuracy_flag=False,
+                                                                monitor_verification_cost_flag=False)
 end = tm.time()
 print(f"Finished learning. My network needed {end - start:.2f} s.\n")
 print("Cost function values on the training data:\n", train_cost, "\n")
